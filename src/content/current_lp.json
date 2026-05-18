@@ -1,0 +1,118 @@
+{
+  "meta": {
+    "title": "Produto Incrível — A solução que você precisava",
+    "description": "Descrição curta do produto para SEO. Explique o principal benefício em até 160 caracteres.",
+    "ogImage": "/og-image.jpg"
+  },
+  "navbar": {
+    "logo": {
+      "text": "NomeDaMarca",
+      "href": "/"
+    },
+    "links": [
+      { "label": "Funcionalidades", "href": "#funcionalidades" },
+      { "label": "Depoimentos", "href": "#depoimentos" },
+      { "label": "Contato", "href": "#contato" }
+    ],
+    "cta": {
+      "label": "Começar Agora",
+      "href": "#contato"
+    }
+  },
+  "hero": {
+    "badge": "Novo — Versão 2.0 disponível",
+    "headline": "A forma mais inteligente de resolver seu problema",
+    "subheadline": "Ajudamos empresas e profissionais a alcançarem seus objetivos com mais eficiência, economia de tempo e resultados comprovados.",
+    "primaryCta": {
+      "label": "Começar Gratuitamente",
+      "href": "#contato"
+    },
+    "secondaryCta": {
+      "label": "Ver como funciona",
+      "href": "#funcionalidades"
+    },
+    "image": "/hero-image.png"
+  },
+  "features": {
+    "badge": "Funcionalidades",
+    "title": "Tudo que você precisa para ter sucesso",
+    "subtitle": "Nossas ferramentas foram criadas para simplificar seu dia a dia e maximizar seus resultados.",
+    "items": [
+      {
+        "icon": "Zap",
+        "title": "Ultra Rápido",
+        "description": "Processe suas tarefas em segundos, não horas. Nossa tecnologia garante desempenho máximo quando você mais precisa."
+      },
+      {
+        "icon": "Shield",
+        "title": "Totalmente Seguro",
+        "description": "Seus dados estão protegidos com criptografia de ponta a ponta. Conformidade com LGPD e ISO 27001."
+      },
+      {
+        "icon": "Users",
+        "title": "Feito para Times",
+        "description": "Colabore em tempo real com sua equipe. Permissões granulares e histórico completo de ações."
+      },
+      {
+        "icon": "BarChart",
+        "title": "Relatórios Avançados",
+        "description": "Dashboards inteligentes com insights que ajudam você a tomar as melhores decisões de negócio."
+      },
+      {
+        "icon": "Smartphone",
+        "title": "Mobile First",
+        "description": "Acesse de qualquer dispositivo. App nativo para iOS e Android com sincronização instantânea."
+      },
+      {
+        "icon": "Globe",
+        "title": "200+ Integrações",
+        "description": "Conecte com as ferramentas que você já usa. Mais de 200 integrações disponíveis nativamente."
+      }
+    ]
+  },
+  "testimonials": {
+    "badge": "Depoimentos",
+    "title": "O que nossos clientes dizem",
+    "subtitle": "Mais de 2.000 empresas já transformaram seus resultados com nossa plataforma.",
+    "items": [
+      {
+        "quote": "Desde que adotamos essa solução, nossa produtividade aumentou 40% e o tempo de onboarding caiu pela metade. Simplesmente indispensável.",
+        "author": "Ana Paula Rodrigues",
+        "role": "CEO na TechStart"
+      },
+      {
+        "quote": "A melhor decisão que tomei para o meu negócio. O suporte é excepcional e a plataforma continua evoluindo com as nossas necessidades.",
+        "author": "Carlos Mendonça",
+        "role": "Diretor de Operações na LogiFlow"
+      },
+      {
+        "quote": "Em 3 meses de uso, já recuperamos o investimento 5x. Os relatórios nos ajudaram a identificar gargalos que nunca teríamos percebido sozinhos.",
+        "author": "Mariana Costa",
+        "role": "Gerente de Produto na Nexus"
+      }
+    ]
+  },
+  "cta": {
+    "headline": "Pronto para transformar seu negócio?",
+    "description": "Junte-se a mais de 2.000 empresas que já estão usando nossa plataforma para crescer mais rápido.",
+    "primaryCta": {
+      "label": "Começar Teste Gratuito",
+      "href": "#contato"
+    },
+    "secondaryCta": {
+      "label": "Falar com Vendas",
+      "href": "#contato"
+    },
+    "note": "Sem cartão de crédito. Cancele quando quiser."
+  },
+  "footer": {
+    "logo": "NomeDaMarca",
+    "tagline": "Simplificando o seu sucesso, um passo de cada vez.",
+    "links": [
+      { "label": "Política de Privacidade", "href": "/privacidade" },
+      { "label": "Termos de Uso", "href": "/termos" },
+      { "label": "Contato", "href": "/contato" }
+    ],
+    "copyright": "© 2026 NomeDaMarca. Todos os direitos reservados."
+  }
+}
