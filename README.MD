@@ -1,523 +1,238 @@
-# 🎯 Estrutura .claude — Guia Completo
+# 🏃‍♂️ Corrida pela Consciência 2026 — Plataforma de Inscrições e Vendas
 
-Este diretório `.claude` define como o Claude deve se comportar, pensar e agir ao trabalhar com o **boilerplate de geração de landing pages**.
+Bem-vindo ao repositório oficial da **Corrida pela Consciência 2026**! Este projeto é uma solução premium de ponta a ponta desenvolvida em **Next.js 15 (App Router)** e **React 19**, projetada para oferecer uma Landing Page esportiva de altíssima conversão acoplada a um fluxo robusto de inscrições, pagamentos (Stripe), banco de dados (Supabase), emails transacionais (Resend) e painel administrativo de controle.
 
----
-
-## 📁 Estrutura de Arquivos
-
-```
-.claude/
-├── agents/                          # Agentes especializados
-│   ├── landing-page-generator.yaml  # Cria landing pages
-│   ├── landing-page-validator.yaml  # Valida qualidade
-│   └── seo-performance-optimizer.yaml # Otimiza SEO
-│
-├── rules/                           # Regras obrigatórias
-│   └── landing-page-rules.yaml      # 10 regras principais
-│
-├── skills/                          # Capacidades especializadas
-│   └── landing-page-skills.yaml     # 8 habilidades técnicas
-│
-├── steering/                        # Direcionamento estratégico
-│   └── project-steering.yaml        # Valores, prioridades, comportamento
-│
-├── workflows/                       # Processos automáticos
-│   └── landing-page-workflows.yaml  # 7 workflows principais
-│
-└── README.md (este arquivo)
-```
+A **Corrida pela Consciência** é um evento esportivo beneficente focado na conscientização sobre saúde mental, realizado na orla de Florianópolis em 12 de julho de 2026. Parte da arrecadação é revertida diretamente para o **Instituto Reviva**.
 
 ---
 
-## 🤖 Agents (Agentes Especializados)
+## 🎨 Identidade Visual & Design System
 
-Cada agente tem uma responsabilidade específica e um workflow:
+A interface do usuário foi concebida sob uma estética escura (*dark mode*), esportiva e energética de alta costura, projetada para impressionar logo no primeiro contato (*wow factor*):
 
-### 1. **landing-page-generator**
-**O QUE FAZ**: Gera landing pages de alta qualidade a partir de briefings
-
-**QUANDO ATIVADO**: Quando você submete um briefing ou URL
-
-**PROCESSO** (9 passos):
-1. Análise do briefing e extração de informações
-2. Pesquisa de mercado e positioning
-3. Estratégia de conteúdo e CJJ
-4. Geração de copy (headlines, benefits, testimonials, FAQ)
-5. Otimização de SEO (meta tags, schema)
-6. Geração do JSON `current_lp.json`
-7. Invoca validator agent
-8. Invoca optimizer agent
-9. Entrega resultado final com relatório
-
-**SAÍDA**: `src/content/current_lp.json` 100% validado
+*   **Paleta de Cores Harmônica & Vibrante:**
+    *   Fundo principal: Preto Profundo e Mineral (`#0B0B0C`, `#000000`, `bg-white/[0.02]`)
+    *   Destaques primários: Amarelo/Verde Neon Altamente Energético (`#D6FF3F`)
+    *   Acentos secundários: Laranja Fogo/Ação (`#FF5A1F`)
+    *   Bordas e detalhes: Linhas sutis com opacidade (`border-white/10`, `border-white/15`)
+*   **Par de Fontes Premium (Google Fonts):**
+    *   **Anton:** Usada em headlines de impacto, em formato inteiramente maiúsculo (*uppercase*) e itálico, criando uma atmosfera veloz, imponente e moderna.
+    *   **Inter:** Utilizada para textos corridos, tabelas e parágrafos, proporcionando leitura limpa e excelente legibilidade em qualquer dispositivo.
+*   **Acessibilidade & UX (WCAG AA):**
+    *   Alto contraste de cores para leitura sem esforço.
+    *   Indicação visual de foco, navegação por teclado fluida e uso correto de tags semânticas do HTML5.
+    *   Animações elegantes desenvolvidas nativamente em CSS puro (`globals.css`), respeitando as configurações de `prefers-reduced-motion`.
 
 ---
 
-### 2. **landing-page-validator**
-**O QUE FAZ**: Audita qualidade, segurança, SEO, acessibilidade
+## 🧱 Arquitetura MPA (Multi-Page Application) de Alto Desempenho
 
-**QUANDO ATIVADO**: Após geração ou sob demanda com `/validate`
+Diferente de landing pages convencionais que são apenas arquivos estáticos ou SPAs monolíticos, o projeto foi arquitetado como um **MPA estático** de altíssima performance para garantir carregamento instantâneo, Core Web Vitals perfeitos e **SEO impecável**:
 
-**CHECKLIST** (50+ itens):
-- ✅ Schema JSON vs TypeScript
-- ✅ Segurança (OWASP Top 10)
-- ✅ Conteúdo (headlines, benefícios, depoimentos)
-- ✅ SEO (meta tags, schema, hierarquia)
-- ✅ Acessibilidade (WCAG 2.1 AA)
-- ✅ Performance (Core Web Vitals potencial)
+1.  **Overview de Seções (`/esportivo`):** Uma página longa que compõe todas as seções informativas do evento (Sobre, Percurso, Categorias, Kits, Cronograma e Motivos).
+2.  **Páginas Individuais por Seção (`/esportivo/[secao]`):** Cada seção marcante da página principal é gerada estaticamente individualmente no build (`generateStaticParams`). Desta forma, rotas dinâmicas como `/esportivo/inscricao` têm seus próprios arquivos estáticos gerados com títulos (`<title>`), meta descrições (`description`) e títulos principais (`<h1>`) exclusivos para indexação massiva no Google.
+3.  **Redirecionamento Inteligente (`/`):** O tráfego direcionado à raiz `/` é imediatamente roteado de forma nativa para `/esportivo`.
 
-**SAÍDA**: Relatório detalhado com score 0-100
-
-**PASSING GRADE**: B (80+/100)
+### 🛡️ Regra de Ouro da Arquitetura: Single Source of Truth
+Para alterar qualquer conteúdo textual ou adicionar/remover seções na landing page, **edite exclusivamente o arquivo [sections.tsx](file:///c:/PASTA%20IMPORTANTE/TESCH_DEV/Landing_Page/esportivo/src/app/esportivo/sections.tsx)**.
+As rotas individuais, barras de navegação, SEO e o [sitemap.ts](file:///c:/PASTA%20IMPORTANTE/TESCH_DEV/Landing_Page/esportivo/src/app/sitemap.ts) são auto-regenerados de forma 100% dinâmica com base no array exportado `sections` deste arquivo.
 
 ---
 
-### 3. **seo-performance-optimizer**
-**O QUE FAZ**: Otimiza copywriting, SEO, e performance
-
-**QUANDO ATIVADO**: Após validação ou sob demanda com `/optimize`
-
-**OTIMIZAÇÕES**:
-- 🔤 Copywriting conversion-focused
-- 🔍 SEO on-page (títulos, descriptions, schema)
-- 📊 Psychology & UX (social proof, urgency)
-- ⚡ Performance (images, code splitting, lazy loading)
-
-**SAÍDA**: Before/after comparison + improvement report
-
----
-
-## 📜 Rules (Regras Obrigatórias)
-
-Arquivo: `rules/landing-page-rules.yaml`
-
-Define as **10 regras invioláveis** do projeto:
-
-### Regra 1: Estrutura JSON
-- ✅ Respeitar 100% o schema de `src/types/landing.ts`
-- ✅ Validação Zod obrigatória
-- ✅ Falha no build = violação
-
-### Regra 2: Meta Tags & SEO
-- ✅ Title: 50-60 caracteres
-- ✅ Description: 150-160 caracteres
-- ✅ Canonical URL, Open Graph, Twitter cards
-
-### Regra 3: Estrutura de Conteúdo
-- ✅ Headlines focados em **benefício** não funcionalidade
-- ✅ Benefícios com **números** de comprovação
-- ✅ Depoimentos com **fotos reais** e **ratings**
-
-### Regra 4: Copywriting
-- ✅ Português brasileiro acessível
-- ✅ Tom consultivo e confiante
-- ✅ Sem jargão, sem superlativas não comprovadas
-
-### Regra 5: Design System
-- ✅ Cores do `current_lp.json`
-- ✅ Tipografia escalada corretamente
-- ✅ Spacing em grid de 4px
-- ✅ Contrast WCAG AA (4.5:1)
-
-### Regra 6: Segurança
-- ✅ ZERO dados sensíveis
-- ✅ Sanitização de HTML com DOMPurify
-- ✅ Validação de URLs com whitelist
-- ✅ OWASP Top 10 compliance
-
-### Regra 7: Acessibilidade
-- ✅ WCAG 2.1 AA obrigatório
-- ✅ Alt text em todas imagens
-- ✅ Keyboard navigation funcional
-- ✅ Focus indicators visíveis
-
-### Regra 8: Performance
-- ✅ Core Web Vitals targets
-- ✅ Images otimizadas (WebP)
-- ✅ Code splitting para heavy components
-- ✅ Lighthouse > 90 em tudo
-
-### Regra 9: Informações de Contato
-- ✅ Endereço completo validado
-- ✅ Telefone em formato correto
-- ✅ Email válido
-- ✅ Horários estruturados
-
-### Regra 10: Integridade de Código
-- ✅ **ÚNICO arquivo permitido**: `src/content/current_lp.json`
-- ✅ Nunca modificar componentes
-- ✅ Nunca modificar types
-- ✅ Build DEVE passar
-
----
-
-## 💡 Skills (Habilidades Especializadas)
-
-Arquivo: `skills/landing-page-skills.yaml`
-
-Define **8 habilidades especializadas** que o Claude possui:
-
-### 1. **Copywriting Conversion-Focused**
-Criar headlines, subheadlines e CTAs que **convertem**
-
-Frameworks:
-- Benefício > Funcionalidade
-- Pain → Solution → Proof → Action
-- Gatilhos mentais éticos (reciprocidade, escassez, autoridade)
-
-Exemplos:
-- ❌ "Serviços de Estética Profissional"
-- ✅ "Rejuvenesça com Segurança e Tecnologia"
-
----
-
-### 2. **SEO On-Page Optimization**
-Otimizar meta tags, schema, hierarquia, linking
-
-Técnicas:
-- Meta title: `[Benefício] | [Empresa] em [Localização]`
-- Meta description: `[Proposta] + [Diferencial] + [Prova]`
-- Schema: LocalBusiness + FAQ + AggregateRating
-- H1 > H2 > H3 (sem gaps)
-
----
-
-### 3. **Design System Validation**
-Validar cores, tipografia, spacing, icons
-
-Checklist:
-- Colors: primary, secondary, neutral, feedback
-- Contrast: WCAG AA (4.5:1 para texto)
-- Typography: Tailwind scale
-- Spacing: 4px grid base
-- Icons: Lucide React library
-
----
-
-### 4. **Security Compliance**
-Detectar vulnerabilidades, validar entrada, sanitizar
-
-OWASP Top 10:
-- A01: Access Control ✅
-- A02: Cryptographic Failures ✅
-- A03: Injection ✅ (Zod validation)
-- A05: Misconfiguration ✅ (CSP headers)
-- ... (todos os 10)
-
----
-
-### 5. **WCAG Accessibility**
-Validar conformance com WCAG 2.1 AA
-
-Dimensões:
-- **Perceivable**: Alt text, color contrast
-- **Operable**: Keyboard nav, focus indicators
-- **Understandable**: Clear language, heading hierarchy
-- **Robust**: Semantic HTML, ARIA labels
-
----
-
-### 6. **Performance Optimization**
-Otimizar Core Web Vitals e Lighthouse
-
-Métricas:
-- LCP: < 2.5s
-- FID: < 100ms
-- CLS: < 0.1
-- Lighthouse: > 90 em tudo
-
-Técnicas:
-- Image optimization (WebP, lazy loading)
-- Code splitting (dynamic imports)
-- Critical CSS (inline)
-- Defer non-critical JS
-
----
-
-### 7. **Content Structure & Strategy**
-Mapear customer journey e estruturar seções
-
-Seções:
-1. **Hero**: Headlines + CTA primário
-2. **Benefits**: 3-5 benefícios com números
-3. **About**: Histórico + números + diferencial
-4. **Testimonials**: 2-5 com foto real + rating
-5. **FAQ**: 3-5 perguntas + respostas concisas
-6. **Contact**: Email, phone, address, hours
-
----
-
-### 8. **Market & Niche Understanding**
-Compreender público-alvo, dores, posicionamento
-
-Análise:
-- Quem é o público?
-- Qual é a dor principal?
-- Qual é a proposta de valor única?
-- Quem são os competidores?
-- Qual é o tom apropriado?
-
----
-
-## 🎯 Steering (Direcionamento Estratégico)
-
-Arquivo: `steering/project-steering.yaml`
-
-Define **valores fundamentais**, **prioridades** e **comportamento** do Claude:
-
-### Valores Fundamentais
-1. **Quality First** — Qualidade sobre velocidade
-2. **User Centric** — Foco no usuário final
-3. **Transparency** — Honesto sobre limitações
-4. **Security Paramount** — Segurança nunca é negociável
-
-### Prioridades (por ordem)
-1. **Correctness** (40%) — Código/conteúdo sempre corretos
-2. **Security** (30%) — Segurança antes conveniência
-3. **UX/A11y** (20%) — Acessibilidade e performance
-4. **Conversion** (10%) — Otimizar ética para conversão
-
-### Princípios de Comportamento
-- Respeitar 100% as restrições (apenas `current_lp.json`)
-- Validação Zod obrigatória
-- Copywriting específico, nunca genérico
-- Segurança primeiro, sempre
-- Comunicação clara e transparente
-
-### Resolução de Conflitos
-| Conflito | Decisão | Razão |
-|----------|---------|-------|
-| Spec vs Request | Spec wins | É documento oficial |
-| Security vs Convenience | Security wins | É paramount |
-| Performance vs Feature | Performance wins | Melhor UX + SEO |
-| Cant find info | Ask user | Qualidade > velocidade |
-
----
-
-## 🔄 Workflows (Processos)
-
-Arquivo: `workflows/landing-page-workflows.yaml`
-
-Define **7 workflows principais**:
-
-### Workflow 1: Generate Landing Page
-**Disparo**: User submits briefing  
-**Passos**: 9 (coleta → análise → copy → SEO → JSON → validate → optimize → output)  
-**Saída**: `current_lp.json` + validation report
-
-### Workflow 2: Validate Landing Page
-**Disparo**: After generation / `/validate` command  
-**Checks**: SEO, Security, Content, Accessibility, Performance  
-**Saída**: Detailed quality report with score
-
-### Workflow 3: Optimize Iteratively
-**Disparo**: Validation fails / `/optimize` command  
-**Iterações**: Max 5 cycles of improve → validate → keep/revert  
-**Saída**: Before/after scores + improvement list
-
-### Workflow 4: Prepare Deployment
-**Disparo**: Validation passed  
-**Checklist**: 25+ itens de code, SEO, security, a11y, performance  
-**Saída**: Ready-to-deploy JSON + instructions
-
-### Workflow 5: Post-Launch Monitoring
-**Disparo**: After deployment  
-**Frequency**: Daily (week 1), then weekly  
-**Monitora**: Core Web Vitals, SEO metrics, conversions, health
-
-### Workflow 6: Handle User Requests
-**Disparo**: User requests changes  
-**Classifica**: Content update / Design change / Bug / Optimization  
-**Processa**: Accordingly based on type
-
-### Workflow 7: Resolve Conflicts
-**Disparo**: Spec vs Request / Security vs Convenience / Performance vs Feature  
-**Decide**: Follow established rules + communicate clearly
-
----
-
-## 🚀 Como Usar Esta Estrutura
-
-### Cenário 1: Usuário quer gerar landing page
-
-```
-1. User: "Crie uma LP para minha clínica de estética em SP"
-   ↓
-2. Claude recognizes: landing-page-generator agent
-   ↓
-3. Agent executes: 9-step workflow
-   ↓
-4. Applies: landing-page-rules (all 10)
-   ↓
-5. Uses: landing-page-skills (all 8)
-   ↓
-6. Produces: src/content/current_lp.json
-   ↓
-7. Invokes: landing-page-validator agent
-   ↓
-8. Invokes: seo-performance-optimizer agent
-   ↓
-9. Delivers: JSON + validation report + suggestions
+## 🚀 Fluxo de Inscrição e Pagamento (Stripe + Supabase)
+
+O motor de conversão financeira da aplicação foi estruturado de forma hiper-segura para capturar leads e evitar qualquer perda de transações:
+
+```mermaid
+graph TD
+    A[Formulário de Inscrição /esportivo/inscricao] -->|Validação Zod| B[API Checkout /api/esportivo/checkout]
+    B -->|Gravação Pré-pagamento| C[(Supabase DB: status='pendente')]
+    C -->|Gera checkout session BRL / PIX / Cartão| D[Stripe Checkout Page]
+    D -->|Sucesso| E[URL /sucesso?session_id=...]
+    D -->|Erro/Cancelado| F[URL /esportivo/inscricao]
+    G[Stripe Webhook /api/webhooks/stripe] -->|Confirmação de Transação| H[(Supabase DB: status='pago')]
+    H -->|Email Confirmado| I[Resend: Envio de recibo ao Cliente]
+    H -->|Alerta ADM| J[Resend: Envio de alerta ao Administrador]
 ```
 
-### Cenário 2: Validar landing page existente
+1.  **Captação de Informações (`/esportivo/inscricao`):** Formulário integrado com tabelas de tamanhos de camiseta detalhadas (Masculino e Feminino baby look). Coleta dados essenciais: Nome, Email, Telefone, CPF, Data de Nascimento, Gênero, Faixa Etária, Distância (5K, 10K, 21K), Tamanho de Camisa e Kit (Básico, Premium ou Embaixador).
+2.  **Validação Segura (`zod`):** Validação rígida do input antes da inserção no banco e do início do pagamento através do schema `InscricaoSchema`.
+3.  **Reserva de Lead no Supabase:** A inscrição é gravada no banco como `pendente` antes de direcionar o usuário para a interface de pagamento. Desta forma, o organizador nunca perde um contato de carrinho abandonado.
+4.  **Stripe Checkout:** Criação de sessão de pagamento direta no Stripe em Reais (BRL), suportando **Cartão de Crédito** e **PIX** com links seguros.
+5.  **Confirmação por Webhook (`/api/webhooks/stripe`):** O Stripe notifica nossa API de forma assíncrona. Validamos a assinatura criptográfica do webhook e, em caso de sucesso (`checkout.session.completed`), alteramos o status da inscrição para `pago` e registramos o horário e método de pagamento.
+6.  **Emails Transacionais (`Resend`):** Envio instantâneo de um e-mail personalizado com os dados da inscrição para o competidor e um aviso de nova venda para o e-mail do administrador.
+
+---
+
+## 🔐 Painel Administrativo de Controle (`/esportivo/admin`)
+
+O sistema conta com um painel de retaguarda completo e altamente visual para gerenciamento das vendas e inscrições:
+
+*   **Login Seguro (`/esportivo/admin/login`):** Autenticação robusta gerida por cookies criptografados, impedindo acessos externos não autorizados.
+*   **Métricas de Desempenho Físico e Financeiro:**
+    *   **Total de Inscrições:** Contagem geral de cadastros.
+    *   **Pagos:** Quantidade de inscritos confirmados que concluíram a transação.
+    *   **Pendentes:** Contagem de transações que não finalizaram a cobrança.
+    *   **Total Arrecadado:** Somatório monetário das inscrições confirmadas (formatado em BRL).
+*   **Tabela Completa de Competidores:**
+    *   Listagem em tempo real ordenada por data de criação.
+    *   Filtros visuais dinâmicos de status (`pago`, `pendente`, `cancelado`) com cores intuitivas.
+    *   Visualização simplificada de todos os metadados: ID, Prova (5K, 10K, 21K), Categoria (Gênero + Faixa Etária), Tamanho de Camiseta, Kit selecionado, CPF, e informações completas de contato (Telefone/Email).
+    *   Integração direta com botão de Logout seguro.
+
+---
+
+## 🛠️ Stack Tecnológica
+
+| Componente | Ferramenta / Biblioteca | Versão |
+| :--- | :--- | :--- |
+| **Framework Web** | Next.js 15 (App Router) | `^15.1.0` |
+| **Biblioteca UI** | React 19 (Server Components) | `^19.0.0` |
+| **Estilização** | Tailwind CSS 3 (Valores inline hex) | `^3.4.1` |
+| **Segurança & BD** | Supabase JS client | `^2.45.4` |
+| **Integração Financeira** | Stripe SDK | `^22.1.1` |
+| **Emails Transacionais** | Resend SDK | `^6.12.3` |
+| **Validação de Formulários** | Zod validation engine | `^4.4.3` |
+| **Iconografia** | Lucide React | `^0.469.0` |
+| **Linguagem** | TypeScript | `^5` |
+
+---
+
+## 📁 Estrutura de Diretórios Estratégica
 
 ```
-1. User: "/validate" ou "verifique a qualidade"
-   ↓
-2. Claude recognizes: landing-page-validator agent
-   ↓
-3. Agent executes: 50+ validation checks
-   ↓
-4. Applies: landing-page-rules (all 10)
-   ↓
-5. Uses: landing-page-skills (SEO, Security, A11y, Performance)
-   ↓
-6. Produces: Detailed quality report with score
-```
-
-### Cenário 3: Otimizar landing page
-
-```
-1. User: "/optimize" ou "melhore isso"
-   ↓
-2. Claude recognizes: seo-performance-optimizer agent
-   ↓
-3. Agent executes: Analysis → Optimization → Validation
-   ↓
-4. Proposes: Improvements (copywriting, SEO, performance)
-   ↓
-5. Applies: Non-critical changes automatically
-   ↓
-6. Asks: User approval for critical changes
-   ↓
-7. Produces: Before/after comparison
-```
-
-### Cenário 4: Conflito ou restrição
-
-```
-1. User requests: Something against spec/security/performance
-   ↓
-2. Claude consults: steering/project-steering.yaml
-   ↓
-3. Decision: Follow spec/security/performance (per rules)
-   ↓
-4. Communication: Explain why + suggest alternative
-   ↓
-5. Result: Quality maintained, user informed
+esportivo/
+├── .agents/                     # Instruções e habilidades dos agentes de IA
+├── .claude/                     # Modelagem comportamental do Claude (obsoleto/legado)
+├── supabase/
+│   └── schema.sql               # Estrutura DDL da tabela no Supabase
+├── src/
+│   ├── app/                     # Roteador Next.js App Router
+│   │   ├── api/                 # Endpoints REST Serverless
+│   │   │   ├── checkout/        # Checkout legado (fluxo antigo /contratar)
+│   │   │   ├── esportivo/       # APIs exclusivas da corrida
+│   │   │   │   ├── admin/       # Autenticação de retaguarda
+│   │   │   │   └── checkout/    # Início do Stripe da inscrição
+│   │   │   └── webhooks/        # Escuta do webhook assíncrono do Stripe
+│   │   ├── esportivo/           # CORE: Módulo da Corrida pela Consciência
+│   │   │   ├── admin/           # Dashboard visual e tela de Login
+│   │   │   ├── inscricao/       # Formulário e tabela de camisetas
+│   │   │   ├── layout.tsx       # Nav, Footer e temas compartilhados
+│   │   │   ├── page.tsx         # Overview composto pelas seções
+│   │   │   └── sections.tsx     # SINGLE SOURCE OF TRUTH (dados/seções)
+│   │   ├── contratar/           # Página de contratação de LPs (legado)
+│   │   ├── sucesso/             # Rota de sucesso pós-checkout
+│   │   ├── cancelado/           # Rota de cancelamento pós-checkout
+│   │   ├── globals.css          # CSS Global + Fontes Anton/Inter + Keyframes CSS
+│   │   ├── layout.tsx           # Layout raiz com fontes base
+│   │   ├── page.tsx             # Redirecionador automático para /esportivo
+│   │   └── sitemap.ts           # Sitemap automatizado para crawlers de SEO
+│   ├── components/              # Componentes vivos e obsoletos (PricingSection)
+│   ├── lib/                     # Conectores externos (Stripe, Resend, Supabase)
+│   └── types/                   # Tipagens TS compartilhadas
 ```
 
 ---
 
-## 📊 Mapa Mental de Integração
+## ⚙️ Variáveis de Ambiente (`.env.local`)
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                  USER REQUEST                           │
-└──────────────────┬──────────────────────────────────────┘
-                   │
-        ┌──────────▼─────────────┐
-        │  Classify Request Type │
-        └──┬─────────┬─────────┬─┘
-           │         │         │
-      ┌────▼────┐ ┌──▼──┐ ┌───▼──┐
-      │ Generate│ │Check│ │Modify│
-      │         │ │ SEO │ │      │
-      └────┬────┘ └──┬──┘ └───┬──┘
-           │         │        │
-    ┌──────▼─────────▼───────▼──┐
-    │      Applicable Agent       │
-    │  (generator/validator/opt)  │
-    └──────┬──────────┬──────────┘
-           │          │
-    ┌──────▼────┐ ┌───▼──────┐
-    │Apply Rules│ │Use Skills │
-    │(10 rules) │ │(8 skills) │
-    └──────┬────┘ └───┬──────┘
-           │          │
-    ┌──────▼──────────▼─┐
-    │  Follow Workflow  │
-    │  (7 workflows)    │
-    └──────┬────────────┘
-           │
-    ┌──────▼──────────────────┐
-    │ Output + Report         │
-    │ (JSON + validation +    │
-    │  suggestions + checklist)│
-    └─────────────────────────┘
+Crie um arquivo `.env.local` na raiz do projeto e configure as seguintes credenciais:
+
+```env
+# URL base do sistema
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Stripe API Keys (Dashboard > Developers > API Keys)
+STRIPE_SECRET_KEY=sk_test_51Px...                 # Chave secreta de homologação/teste
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_51Px... # Chave pública de homologação/teste
+
+# Segredo de assinatura de webhooks do Stripe
+# (Em desenvolvimento: obtido no `stripe listen`. Em prod: configurado no webhook do Stripe)
+STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Resend API Key (resend.com > API Keys)
+RESEND_API_KEY=re_...
+EMAIL_FROM=onboarding@resend.dev                   # Em prod: contato@seu-dominio.com.br
+EMAIL_ADMIN=voce@seu-dominio.com.br                 # Email que receberá os alertas de novas vendas
+
+# Supabase API Keys (Dashboard > Project Settings > API)
+NEXT_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJ...                    # IMPORTANTE: Use a service_role key para bypass de RLS
+
+# Painel Administrativo (/esportivo/admin)
+ADMIN_PASSWORD=SenhaForteDeSuaEscolha                # Senha de login para o dashboard
 ```
 
----
-
-## ✅ Checklist de Implementação
-
-Ao começar a usar este boilerplate:
-
-- [ ] Ler este README completamente
-- [ ] Estudar `agents/` para entender workflows
-- [ ] Estudar `rules/` para entender restrições
-- [ ] Estudar `skills/` para entender capacidades
-- [ ] Estudar `steering/` para entender valores
-- [ ] Estudar `workflows/` para entender processos
-- [ ] Fazer um test run com briefing simples
-- [ ] Validar saída JSON
-- [ ] Testar no projeto real
+> [!WARNING]
+> Nunca comite o arquivo `.env.local` para controle de versão. Ele é protegido e ignorado pelo `.gitignore`.
 
 ---
 
-## 🆘 Troubleshooting
+## 🚀 Instalação e Execução Local
 
-### Problema: JSON não valida
-**Causa**: Violação de schema TypeScript  
-**Solução**: Validate against `src/types/landing.ts`  
-**Comando**: `npm run build`
+Siga os passos abaixo para colocar a plataforma em execução na sua máquina local:
 
-### Problema: Security warning
-**Causa**: Dados sensíveis ou URL não validada  
-**Solução**: Remove sensitive data, whitelist URL  
-**Ref**: Rule #6 (Security)
+### 1. Clonar o projeto e instalar dependências
+```bash
+npm install
+```
 
-### Problema: SEO score baixo
-**Causa**: Meta tags subótimas ou schema inválido  
-**Solução**: Use `/optimize` ou `/validate` + sugestões  
-**Ref**: Skill #2 (SEO On-Page Optimization)
+### 2. Configurar a Tabela no Supabase
+Acesse o console do seu projeto Supabase, clique em **SQL Editor** > **New Query**, copie a estrutura contida no arquivo [supabase/schema.sql](file:///c:/PASTA%20IMPORTANTE/TESCH_DEV/Landing_Page/esportivo/supabase/schema.sql) e clique em **Run**.
 
-### Problema: Acessibilidade falha
-**Causa**: Contrast ratio baixo ou alt text faltando  
-**Solução**: Apply accessibility fixes from report  
-**Ref**: Skill #5 (WCAG Accessibility)
+Isso irá criar a tabela `inscricoes` pronta para cadastrar competidores, além de habilitar o **Row Level Security (RLS)** para impedir acesso público de leitura e escrita direto pelo navegador (todo o CRUD é realizado de forma ultra-segura através do nosso servidor via `service_role`).
 
-### Problema: Performance ruim
-**Causa**: Images não otimizadas ou code splitting  
-**Solução**: Use `/optimize` para sugestões  
-**Ref**: Skill #6 (Performance Optimization)
+### 3. Rodar o Servidor de Desenvolvimento
+```bash
+npm run dev
+```
+O projeto estará rodando localmente em: [http://localhost:3000](http://localhost:3000).
 
----
-
-## 📞 Contato & Escalação
-
-- **Bug no JSON**: Use `/validate` para detalhes
-- **Security issue**: Escalate immediately (critical priority)
-- **Feature request**: Discuta se está dentro do scope
-- **Spec conflict**: Segue a spec sempre
+### 4. Testar o Webhook de Pagamento Localmente (Stripe CLI)
+Para testar o fluxo de PIX e Cartão de ponta a ponta em ambiente de testes:
+1.  Baixe e instale a **Stripe CLI** no seu computador.
+2.  Inicie sessão digitando no seu terminal:
+    ```bash
+    stripe login
+    ```
+3.  Inicie o redirecionamento local de eventos para a sua rota local:
+    ```bash
+    stripe listen --forward-to localhost:3000/api/webhooks/stripe
+    ```
+4.  A CLI imprimirá um código iniciante em `whsec_...`. Copie este valor e cole na chave `STRIPE_WEBHOOK_SECRET` do seu arquivo `.env.local`.
+5.  Reinicie o servidor local (`npm run dev`) e realize uma inscrição de teste para ver o fluxo completar com sucesso!
 
 ---
 
-## 📚 Referências Rápidas
+## 🏗️ Validação e Build de Produção
 
-| Item | Arquivo | Descrição |
-|------|---------|-----------|
-| Agents | `agents/*.yaml` | 3 agentes especializados |
-| Rules | `rules/*.yaml` | 10 regras obrigatórias |
-| Skills | `skills/*.yaml` | 8 habilidades técnicas |
-| Steering | `steering/*.yaml` | Valores e prioridades |
-| Workflows | `workflows/*.yaml` | 7 processos principais |
-| SPEC | `../SPEC.md` | Documento técnico completo |
+Antes de enviar o código para o servidor ou Vercel, é mandatório testar a tipagem estatística e a compilação completa para verificar possíveis corrupções:
+
+```bash
+# Verificar erros de compilação de TypeScript
+npx tsc --noEmit
+
+# Apagar caches e testar compilação limpa do Next.js
+rm -rf .next && npm run build
+```
+
+As rotas dinâmicas do MPA em `/esportivo/[secao]` devem aparecer como marcadas com `● (SSG)` com suas páginas estáticas pré-renderizadas. As APIs em `/api/*` devem compilar como `ƒ (Dynamic)`.
 
 ---
 
-**Última atualização**: Janeiro 2024  
-**Versão**: 1.0.0  
-**Status**: ✅ Production-ready
+## 📈 Checklist para Colocação em Produção
+
+Ao migrar o projeto para a conta definitiva do cliente, certifique-se de realizar:
+
+- [ ] Substituir as chaves de teste (`sk_test`, `pk_test`) do Stripe pelas chaves **LIVE** da conta do cliente (`sk_live`, `pk_live`).
+- [ ] Ativar o Webhook no dashboard do Stripe apontando para a URL real de produção: `https://seu-dominio.com.br/api/webhooks/stripe`, habilitando o evento `checkout.session.completed`. Atualizar a chave `STRIPE_WEBHOOK_SECRET` no servidor com o novo segredo gerado pelo Stripe Dashboard.
+- [ ] Adicionar e validar o domínio oficial do cliente no painel da **Resend** para usar um email de remetente profissional (ex: `inscricoes@corrida.com.br`) ao invés do email temporário `onboarding@resend.dev`.
+- [ ] Configurar a variável `NEXT_PUBLIC_APP_URL` na plataforma de hospedagem (Vercel, Netlify, etc.) apontando para o domínio definitivo do cliente.
+- [ ] Modificar a chave `ADMIN_PASSWORD` com uma senha de alta complexidade nas variáveis de ambiente do servidor.
+- [ ] Criar o arquivo `robots.txt` para regular a indexação dos crawlers de forma ideal no ambiente público.
+
+---
+
+## 🤝 Créditos e Contribuições
+
+Este boilerplate de multi-templates foi simplificado para focar unicamente no segmento esportivo. A manutenção e adição de novos blocos visuais devem seguir os padrões de Server Components e Tailwind descritos na especificação oficial do projeto.
