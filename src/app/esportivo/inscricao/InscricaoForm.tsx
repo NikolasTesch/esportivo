@@ -19,6 +19,7 @@ const labelCls =
 export function InscricaoForm() {
   const [genero, setGenero] = useState<(typeof GENEROS)[number]>('masculino')
   const [kit, setKit] = useState<string>('basico')
+  const [metodo, setMetodo] = useState<'cartao' | 'pix'>('cartao')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -41,6 +42,7 @@ export function InscricaoForm() {
       distancia: String(fd.get('distancia') ?? ''),
       tamanho_camisa: String(fd.get('tamanho_camisa') ?? ''),
       kit,
+      metodo,
     }
     try {
       const res = await fetch('/api/esportivo/checkout', {
@@ -169,6 +171,42 @@ export function InscricaoForm() {
             <label className={labelCls} htmlFor="data_nascimento">Data de nascimento</label>
             <input id="data_nascimento" name="data_nascimento" type="date" required className={inputCls} />
           </div>
+        </div>
+      </fieldset>
+
+      <fieldset className="space-y-6">
+        <legend className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
+          4 · Forma de pagamento
+        </legend>
+        <div className="grid gap-px bg-white/10 sm:grid-cols-2">
+          {([
+            { id: 'cartao', titulo: 'Cartão de crédito', sub: 'Stripe · até 12x · aprovação na hora' },
+            { id: 'pix', titulo: 'Pix', sub: 'InfinitePay · pagamento à vista · sem taxa' },
+          ] as const).map((m) => {
+            const ativo = metodo === m.id
+            return (
+              <button
+                type="button"
+                key={m.id}
+                onClick={() => setMetodo(m.id)}
+                aria-pressed={ativo}
+                className={`flex flex-col items-start p-6 text-left transition-colors ${
+                  ativo
+                    ? 'bg-[#D6FF3F] text-black'
+                    : 'bg-[#0B0B0C] text-white hover:bg-white/[0.04]'
+                }`}
+              >
+                <span className="text-lg font-bold uppercase tracking-wide">
+                  {m.titulo}
+                </span>
+                <span
+                  className={`mt-1 text-xs ${ativo ? 'text-black/70' : 'text-white/45'}`}
+                >
+                  {m.sub}
+                </span>
+              </button>
+            )
+          })}
         </div>
       </fieldset>
 

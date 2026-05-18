@@ -66,6 +66,8 @@ export const InscricaoSchema = z
     distancia: z.enum(DISTANCIAS),
     tamanho_camisa: z.string().min(1).max(4),
     kit: z.enum(['basico', 'premium', 'embaixador']),
+    // cartao -> Stripe Checkout · pix -> InfinitePay
+    metodo: z.enum(['cartao', 'pix']),
   })
   .refine(
     (d) => TAMANHOS_VALIDOS[d.genero].includes(d.tamanho_camisa),
