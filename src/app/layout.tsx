@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { fontVariables } from '@/lib/fonts'
-import { Analytics } from '@vercel/analytics/react'
+import { Analytics } from '@vercel/analytics/next'
 
 export const metadata: Metadata = {
   title: 'Atelier de Landing Pages — Modelos por segmento',
