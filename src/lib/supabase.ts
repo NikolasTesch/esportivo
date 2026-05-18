@@ -33,6 +33,8 @@ export interface Inscricao {
   status: 'pendente' | 'pago' | 'cancelado'
   amount_cents: number | null
   payment_method: string | null
+  provider: 'stripe' | 'infinitepay'
   stripe_session_id: string | null
+  order_nsu: string | null
   paid_at: string | null
 }
