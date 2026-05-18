@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { fontVariables } from '@/lib/fonts'
+import { Analytics } from '@vercel/analytics/react'
 
 export const metadata: Metadata = {
   title: 'Atelier de Landing Pages — Modelos por segmento',
@@ -11,7 +12,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" className={fontVariables}>
-      <body>{children}</body>
+      <body>
+        {children}
+        <Analytics />
+      </body>
     </html>
   )
 }
