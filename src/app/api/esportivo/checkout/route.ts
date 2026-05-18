@@ -72,7 +72,9 @@ export async function POST(req: NextRequest) {
   try {
     const session = await getStripe().checkout.sessions.create({
       mode: 'payment',
-      payment_method_types: ['card', 'pix'],
+      // Sem payment_method_types fixo: o Checkout usa os métodos ativados
+      // no dashboard da conta Stripe do cliente (cartão, Pix, boleto…).
+      // O cliente liga/desliga métodos no painel dele, sem mexer no código.
       customer_email: d.email,
       line_items: [
         {
