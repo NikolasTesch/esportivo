@@ -104,11 +104,6 @@ describe('InscricaoSchema', () => {
     expect(result.success).toBe(false)
   })
 
-  it('rejeita método de pagamento inválido', () => {
-    const result = InscricaoSchema.safeParse({ ...BASE_VALIDO, metodo: 'boleto' })
-    expect(result.success).toBe(false)
-  })
-
   it('rejeita tamanho de camisa incompatível com gênero feminino', () => {
     // XGG só existe para masculino
     const result = InscricaoSchema.safeParse({

@@ -21,15 +21,15 @@ create table if not exists public.inscricoes (
   tamanho_camisa    text not null,
   kit               text not null default 'basico',
 
-  -- pagamento (validado pelo webhook do provedor após confirmação)
+  -- pagamento (confirmado pelo webhook do Mercado Pago)
   status            text not null default 'pendente'
                        check (status in ('pendente','pago','cancelado')),
   amount_cents      integer,
-  payment_method    text,
-  provider          text not null default 'stripe'
-                       check (provider in ('stripe','pix','infinitepay')),
-  stripe_session_id text unique,
-  order_nsu         text unique,
+  payment_method    text,            -- 'credit_card', 'pix', etc. (preenchido pelo webhook)
+  provider          text not null default 'mercadopago'
+                       check (provider in ('mercadopago','stripe','pix','infinitepay')),
+  stripe_session_id text unique,     -- legado (fluxo /contratar via Stripe)
+  order_nsu         text unique,     -- preference_id do Mercado Pago
   paid_at           timestamptz
 );
 
@@ -41,11 +41,10 @@ create index if not exists inscricoes_created_idx on public.inscricoes (created_
 alter table public.inscricoes enable row level security;
 
 -- ------------------------------------------------------------
--- MIGRAÇÃO: se a tabela já existia, rode apenas este bloco para
--- atualizar o check constraint e incluir 'pix' como provider.
+-- MIGRAÇÃO: se a tabela já existia, rode apenas este bloco.
 -- ------------------------------------------------------------
 -- alter table public.inscricoes
 --   drop constraint if exists inscricoes_provider_check;
 -- alter table public.inscricoes
 --   add constraint inscricoes_provider_check
---     check (provider in ('stripe','pix','infinitepay'));
+--     check (provider in ('mercadopago','stripe','pix','infinitepay'));

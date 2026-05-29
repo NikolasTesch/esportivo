@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getStripe } from '@/lib/stripe'
 import { getSupabase } from '@/lib/supabase'
 import { getEnv } from '@/lib/env'
 import { InscricaoSchema, totalCents, KITS } from '@/lib/esportivo'
+import { createCheckoutPreference } from '@/lib/mercadopago'
 
 export const runtime = 'nodejs'
 
@@ -23,7 +23,6 @@ export async function POST(req: NextRequest) {
   }
   const d = parsed.data
   const amount = totalCents(d.kit)
-  const provider = d.metodo === 'pix' ? 'pix' : 'stripe'
 
   let supabase
   try {
@@ -35,7 +34,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // 1. Grava a inscrição como PENDENTE antes de cobrar — nenhum lead se perde.
+  // 1. Grava inscrição como PENDENTE antes de redirecionar — nenhum lead se perde.
   const { data: row, error: dbErr } = await supabase
     .from('inscricoes')
     .insert({
@@ -51,7 +50,7 @@ export async function POST(req: NextRequest) {
       kit: d.kit,
       status: 'pendente',
       amount_cents: amount,
-      provider,
+      provider: 'mercadopago',
     })
     .select('id')
     .single()
@@ -72,38 +71,29 @@ export async function POST(req: NextRequest) {
   const kitLabel = KITS.find((k) => k.id === d.kit)?.label ?? 'Básico'
   const sucessoUrl = `${baseUrl}/esportivo/inscricao/sucesso?ref=${row.id}`
 
-  // ---- Stripe (Cartão ou Pix) ---------------------------------------------
+  // 2. Cria preferência no Mercado Pago (aceita cartão e Pix).
   try {
-    const session = await getStripe().checkout.sessions.create({
-      mode: 'payment',
-      payment_method_types: provider === 'pix' ? ['pix'] : ['card'],
-      customer_email: d.email,
-      line_items: [
-        {
-          quantity: 1,
-          price_data: {
-            currency: 'brl',
-            unit_amount: amount,
-            product_data: {
-              name: `Inscrição ${d.distancia} — Corrida pela Consciência 2026`,
-              description: `Kit ${kitLabel} · Camisa ${d.tamanho_camisa} · ${d.genero}`,
-            },
-          },
-        },
-      ],
-      success_url: `${sucessoUrl}&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/esportivo/inscricao`,
-      metadata: { inscricao_id: row.id, distancia: d.distancia, kit: d.kit },
+    const preference = await createCheckoutPreference({
+      amountCents: amount,
+      description: `Inscrição ${d.distancia} — Corrida pela Consciência 2026 · Kit ${kitLabel}`,
+      email: d.email,
+      nome: d.nome,
+      cpf: d.cpf,
+      inscricaoId: row.id,
+      notificationUrl: `${baseUrl}/api/webhooks/mercadopago`,
+      successUrl: `${sucessoUrl}&preference_id={preference_id}`,
+      failureUrl: `${baseUrl}/esportivo/inscricao`,
+      pendingUrl: sucessoUrl,
     })
 
     await supabase
       .from('inscricoes')
-      .update({ stripe_session_id: session.id })
+      .update({ order_nsu: preference.id })
       .eq('id', row.id)
 
-    return NextResponse.json({ url: session.url })
+    return NextResponse.json({ url: preference.checkoutUrl })
   } catch (err) {
-    console.error('esportivo_checkout_error', err)
+    console.error('mp_checkout_error', err)
     await supabase
       .from('inscricoes')
       .update({ status: 'cancelado' })
@@ -114,4 +104,3 @@ export async function POST(req: NextRequest) {
     )
   }
 }
-

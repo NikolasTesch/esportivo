@@ -123,7 +123,13 @@ export default async function SucessoPage({
           <Linha k="Kit" v={row.kit} />
           <Linha
             k="Pagamento"
-            v={row.provider === 'pix' ? 'Pix' : 'Cartão de crédito'}
+            v={
+              row.provider === 'mercadopago'
+                ? 'Mercado Pago (cartão ou Pix)'
+                : row.provider === 'pix'
+                  ? 'Pix'
+                  : 'Cartão de crédito'
+            }
           />
           <Linha
             k="Valor"

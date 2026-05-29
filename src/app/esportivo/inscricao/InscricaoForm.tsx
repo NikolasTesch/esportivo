@@ -59,7 +59,6 @@ function FieldSection({ children, index }: { children: React.ReactNode; index: n
 export function InscricaoForm() {
   const [genero, setGenero] = useState<(typeof GENEROS)[number]>('masculino')
   const [kit, setKit] = useState<string>('basico')
-  const [metodo, setMetodo] = useState<'cartao' | 'pix'>('cartao')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [cpf, setCpf] = useState('')
@@ -112,7 +111,6 @@ export function InscricaoForm() {
       distancia: String(fd.get('distancia') ?? ''),
       tamanho_camisa: String(fd.get('tamanho_camisa') ?? ''),
       kit,
-      metodo,
     }
     try {
       const res = await fetch('/api/esportivo/checkout', {
@@ -329,47 +327,6 @@ export function InscricaoForm() {
         </fieldset>
       </FieldSection>
 
-      <FieldSection index={3}>
-        <fieldset className="space-y-6">
-          <legend className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
-            4 · Forma de pagamento
-          </legend>
-          <div className="grid gap-px bg-white/10 sm:grid-cols-2">
-            {([
-              { id: 'cartao', titulo: 'Cartão de crédito', sub: ' Até 12x · aprovação na hora' },
-              { id: 'pix', titulo: 'Pix', sub: ' Pagamento à vista' },
-            ] as const).map((m) => {
-              const ativo = metodo === m.id
-              return (
-                <motion.button
-                  type="button"
-                  key={m.id}
-                  onClick={() => setMetodo(m.id)}
-                  aria-pressed={ativo}
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  transition={{ duration: 0.18 }}
-                  className={`flex flex-col items-start p-6 text-left transition-colors ${
-                    ativo
-                      ? 'bg-[#D6FF3F] text-black'
-                      : 'bg-[#0B0B0C] text-white hover:bg-white/[0.04]'
-                  }`}
-                >
-                  <span className="text-lg font-bold uppercase tracking-wide">
-                    {m.titulo}
-                  </span>
-                  <span
-                    className={`mt-1 text-xs ${ativo ? 'text-black/70' : 'text-white/45'}`}
-                  >
-                    {m.sub}
-                  </span>
-                </motion.button>
-              )
-            })}
-          </div>
-        </fieldset>
-      </FieldSection>
-
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -402,7 +359,7 @@ export function InscricaoForm() {
           transition={{ duration: 0.18 }}
           className="inline-flex items-center justify-center gap-3 bg-[#D6FF3F] px-9 py-5 text-sm font-extrabold uppercase tracking-[0.16em] text-black disabled:opacity-50"
         >
-          {loading ? 'Redirecionando…' : 'Ir para o pagamento'}
+          {loading ? 'Redirecionando…' : 'Pagar com Mercado Pago'}
         </motion.button>
       </motion.div>
     </form>

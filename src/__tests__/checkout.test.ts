@@ -6,17 +6,14 @@ import type { NextRequest } from 'next/server'
 // ---------------------------------------------------------------------------
 const mockInsert = vi.fn()
 const mockUpdate = vi.fn()
-const mockFrom = vi.fn(() => ({
-  insert: mockInsert,
-  update: mockUpdate,
-}))
+const mockFrom = vi.fn(() => ({ insert: mockInsert, update: mockUpdate }))
 vi.mock('@/lib/supabase', () => ({
   getSupabase: () => ({ from: mockFrom }),
 }))
 
-const mockSessionCreate = vi.fn()
-vi.mock('@/lib/stripe', () => ({
-  getStripe: () => ({ checkout: { sessions: { create: mockSessionCreate } } }),
+const mockCreatePreference = vi.fn()
+vi.mock('@/lib/mercadopago', () => ({
+  createCheckoutPreference: (...args: unknown[]) => mockCreatePreference(...args),
 }))
 
 vi.mock('@/lib/env', () => ({
@@ -24,7 +21,7 @@ vi.mock('@/lib/env', () => ({
 }))
 
 // ---------------------------------------------------------------------------
-// Payload de inscrição válido reutilizável
+// Payload de inscrição válido (sem metodo — campo removido)
 // ---------------------------------------------------------------------------
 const BASE = {
   nome: 'Maria Oliveira',
@@ -58,14 +55,14 @@ function supabaseInsertOk(id = 'uuid-1234') {
 
 function supabaseInsertErr() {
   mockInsert.mockReturnValue({
-    select: () => ({ single: () => Promise.resolve({ data: null, error: new Error('db fail') }) }),
+    select: () => ({
+      single: () => Promise.resolve({ data: null, error: new Error('db fail') }),
+    }),
   })
 }
 
 function supabaseUpdateOk() {
-  mockUpdate.mockReturnValue({
-    eq: () => Promise.resolve({ error: null }),
-  })
+  mockUpdate.mockReturnValue({ eq: () => Promise.resolve({ error: null }) })
 }
 
 // ---------------------------------------------------------------------------
@@ -77,91 +74,79 @@ describe('POST /api/esportivo/checkout', () => {
   beforeEach(async () => {
     vi.clearAllMocks()
     supabaseUpdateOk()
-    // Reimportar garante que os mocks estejam activos
     const mod = await import('../app/api/esportivo/checkout/route')
     POST = mod.POST
   })
 
-  // ---- Cartão ---------------------------------------------------------------
-  it('cartão: grava inscrição como pendente e retorna URL do Stripe', async () => {
+  // ---- Fluxo principal (Mercado Pago) --------------------------------------
+
+  it('grava inscrição como pendente com provider mercadopago e retorna URL do MP', async () => {
     supabaseInsertOk('abc-111')
-    mockSessionCreate.mockResolvedValue({ url: 'https://checkout.stripe.com/cartao', id: 'cs_test' })
+    mockCreatePreference.mockResolvedValue({
+      id: 'pref-123',
+      checkoutUrl: 'https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=pref-123',
+    })
 
-    const res = await POST(makeRequest({ ...BASE, metodo: 'cartao' }))
+    const res = await POST(makeRequest(BASE))
     const body = await res.json()
 
     expect(res.status).toBe(200)
-    expect(body.url).toBe('https://checkout.stripe.com/cartao')
+    expect(body.url).toContain('mercadopago.com.br')
 
-    // Confirma que Stripe foi chamado com payment_method_types: card
-    expect(mockSessionCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ payment_method_types: ['card'] }),
-    )
-
-    // provider gravado como 'stripe'
     expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({ provider: 'stripe', status: 'pendente' }),
+      expect.objectContaining({ provider: 'mercadopago', status: 'pendente' }),
     )
   })
 
-  // ---- Pix ------------------------------------------------------------------
-  it('pix: grava inscrição com provider "pix" e retorna URL do Stripe', async () => {
+  it('grava o preference_id no campo order_nsu após criar a preferência', async () => {
     supabaseInsertOk('abc-222')
-    mockSessionCreate.mockResolvedValue({ url: 'https://checkout.stripe.com/pix', id: 'cs_pix' })
+    mockCreatePreference.mockResolvedValue({
+      id: 'pref-456',
+      checkoutUrl: 'https://mercadopago.com.br/checkout/pref-456',
+    })
 
-    const res = await POST(makeRequest({ ...BASE, metodo: 'pix' }))
-    const body = await res.json()
+    await POST(makeRequest(BASE))
 
-    expect(res.status).toBe(200)
-    expect(body.url).toBe('https://checkout.stripe.com/pix')
-
-    // Stripe deve ser chamado com payment_method_types: pix
-    expect(mockSessionCreate).toHaveBeenCalledWith(
-      expect.objectContaining({ payment_method_types: ['pix'] }),
-    )
-
-    // provider gravado como 'pix' (não mais 'infinitepay')
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({ provider: 'pix', status: 'pendente' }),
-    )
+    expect(mockUpdate).toHaveBeenCalledWith({ order_nsu: 'pref-456' })
   })
 
-  it('pix: InfinitePay NÃO é mais chamado', async () => {
+  it('passa description, email, nome, cpf e amountCents corretos ao MP', async () => {
     supabaseInsertOk('abc-333')
-    mockSessionCreate.mockResolvedValue({ url: 'https://checkout.stripe.com/pix2', id: 'cs_pix2' })
+    mockCreatePreference.mockResolvedValue({ id: 'p', checkoutUrl: 'https://mp.com/p' })
 
-    await POST(makeRequest({ ...BASE, metodo: 'pix' }))
+    await POST(makeRequest(BASE))
 
-    // Stripe sessions.create é o único ponto de saída — verifica que foi chamado
-    expect(mockSessionCreate).toHaveBeenCalledTimes(1)
-  })
-
-  // ---- Valores ----------------------------------------------------------
-  it('kit premium: amount_cents = 8000 + 8900', async () => {
-    supabaseInsertOk('abc-444')
-    mockSessionCreate.mockResolvedValue({ url: 'https://checkout.stripe.com/x', id: 'cs_x' })
-
-    await POST(makeRequest({ ...BASE, metodo: 'cartao', kit: 'premium' }))
-
-    expect(mockInsert).toHaveBeenCalledWith(
-      expect.objectContaining({ amount_cents: 16900 }),
-    )
-    expect(mockSessionCreate).toHaveBeenCalledWith(
+    expect(mockCreatePreference).toHaveBeenCalledWith(
       expect.objectContaining({
-        line_items: expect.arrayContaining([
-          expect.objectContaining({
-            price_data: expect.objectContaining({ unit_amount: 16900 }),
-          }),
-        ]),
+        email: 'maria@email.com',
+        nome: 'Maria Oliveira',
+        cpf: '111.444.777-35',
+        amountCents: 8000,
       }),
     )
   })
 
-  it('kit embaixador: amount_cents = 8000 + 16900', async () => {
-    supabaseInsertOk('abc-555')
-    mockSessionCreate.mockResolvedValue({ url: 'https://checkout.stripe.com/y', id: 'cs_y' })
+  // ---- Valores por kit -----------------------------------------------------
 
-    await POST(makeRequest({ ...BASE, metodo: 'cartao', kit: 'embaixador' }))
+  it('kit premium: amount_cents = 8000 + 8900 = 16900', async () => {
+    supabaseInsertOk('abc-444')
+    mockCreatePreference.mockResolvedValue({ id: 'p', checkoutUrl: 'https://mp.com/p' })
+
+    await POST(makeRequest({ ...BASE, kit: 'premium' }))
+
+    expect(mockInsert).toHaveBeenCalledWith(
+      expect.objectContaining({ amount_cents: 16900 }),
+    )
+    expect(mockCreatePreference).toHaveBeenCalledWith(
+      expect.objectContaining({ amountCents: 16900 }),
+    )
+  })
+
+  it('kit embaixador: amount_cents = 8000 + 16900 = 24900', async () => {
+    supabaseInsertOk('abc-555')
+    mockCreatePreference.mockResolvedValue({ id: 'p', checkoutUrl: 'https://mp.com/p' })
+
+    await POST(makeRequest({ ...BASE, kit: 'embaixador' }))
 
     expect(mockInsert).toHaveBeenCalledWith(
       expect.objectContaining({ amount_cents: 24900 }),
@@ -169,20 +154,21 @@ describe('POST /api/esportivo/checkout', () => {
   })
 
   // ---- Erros de validação --------------------------------------------------
+
   it('retorna 400 para payload sem nome', async () => {
     const { nome: _omit, ...semNome } = BASE
-    const res = await POST(makeRequest({ ...semNome, metodo: 'cartao' }))
+    const res = await POST(makeRequest(semNome))
     expect(res.status).toBe(400)
-    expect(mockSessionCreate).not.toHaveBeenCalled()
+    expect(mockCreatePreference).not.toHaveBeenCalled()
   })
 
   it('retorna 400 para e-mail inválido', async () => {
-    const res = await POST(makeRequest({ ...BASE, email: 'nao-e-email', metodo: 'cartao' }))
+    const res = await POST(makeRequest({ ...BASE, email: 'nao-e-email' }))
     expect(res.status).toBe(400)
   })
 
   it('retorna 400 para distância inválida', async () => {
-    const res = await POST(makeRequest({ ...BASE, distancia: '100K', metodo: 'pix' }))
+    const res = await POST(makeRequest({ ...BASE, distancia: '100K' }))
     expect(res.status).toBe(400)
   })
 
@@ -197,48 +183,35 @@ describe('POST /api/esportivo/checkout', () => {
   })
 
   // ---- Erros de infra -------------------------------------------------------
+
   it('retorna 500 quando Supabase falha no insert', async () => {
     supabaseInsertErr()
-    const res = await POST(makeRequest({ ...BASE, metodo: 'cartao' }))
+    const res = await POST(makeRequest(BASE))
     expect(res.status).toBe(500)
-    expect(mockSessionCreate).not.toHaveBeenCalled()
+    expect(mockCreatePreference).not.toHaveBeenCalled()
   })
 
-  it('cartão: retorna 500 e marca cancelado quando Stripe falha', async () => {
+  it('retorna 500 e marca cancelado quando Mercado Pago falha', async () => {
     supabaseInsertOk('abc-666')
-    mockSessionCreate.mockRejectedValue(new Error('stripe timeout'))
+    mockCreatePreference.mockRejectedValue(new Error('mp timeout'))
 
-    const res = await POST(makeRequest({ ...BASE, metodo: 'cartao' }))
+    const res = await POST(makeRequest(BASE))
     expect(res.status).toBe(500)
-
-    // inscricao marcada como cancelada
     expect(mockUpdate).toHaveBeenCalledWith({ status: 'cancelado' })
   })
 
-  it('pix: retorna 500 e marca cancelado quando Stripe falha', async () => {
-    supabaseInsertOk('abc-777')
-    mockSessionCreate.mockRejectedValue(new Error('stripe pix error'))
+  // ---- notification_url e external_reference --------------------------------
 
-    const res = await POST(makeRequest({ ...BASE, metodo: 'pix' }))
-    expect(res.status).toBe(500)
-
-    expect(mockUpdate).toHaveBeenCalledWith({ status: 'cancelado' })
-  })
-
-  // ---- Metadata do Stripe ---------------------------------------------------
-  it('metadata inclui inscricao_id, distancia e kit', async () => {
+  it('passa inscricaoId como external_reference e notification_url correto', async () => {
     supabaseInsertOk('meta-id-1')
-    mockSessionCreate.mockResolvedValue({ url: 'https://stripe.com/s', id: 'cs_meta' })
+    mockCreatePreference.mockResolvedValue({ id: 'p', checkoutUrl: 'https://mp.com/p' })
 
-    await POST(makeRequest({ ...BASE, metodo: 'cartao', distancia: '21K', kit: 'premium' }))
+    await POST(makeRequest({ ...BASE, distancia: '21K', kit: 'premium' }))
 
-    expect(mockSessionCreate).toHaveBeenCalledWith(
+    expect(mockCreatePreference).toHaveBeenCalledWith(
       expect.objectContaining({
-        metadata: expect.objectContaining({
-          inscricao_id: 'meta-id-1',
-          distancia: '21K',
-          kit: 'premium',
-        }),
+        inscricaoId: 'meta-id-1',
+        notificationUrl: 'http://localhost:3000/api/webhooks/mercadopago',
       }),
     )
   })
