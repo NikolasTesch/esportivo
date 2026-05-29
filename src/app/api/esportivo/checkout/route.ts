@@ -93,7 +93,8 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ url: preference.checkoutUrl })
   } catch (err) {
-    console.error('mp_checkout_error', err)
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('mp_checkout_error', msg)
     await supabase
       .from('inscricoes')
       .update({ status: 'cancelado' })

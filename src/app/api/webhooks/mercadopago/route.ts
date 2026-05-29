@@ -49,7 +49,6 @@ async function confirmarInscricao(payment: MPPayment): Promise<boolean> {
     customerName: row.nome,
     amountCents,
     planLabel: `Inscrição ${row.distancia} (${row.kit})`,
-    isSubscription: false,
   })
 
   return true

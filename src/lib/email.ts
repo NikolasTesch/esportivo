@@ -15,7 +15,6 @@ export interface SaleInfo {
   customerName: string | null
   amountCents: number
   planLabel: string
-  isSubscription: boolean
 }
 
 function formatBRL(cents: number): string {
@@ -28,30 +27,6 @@ function formatBRL(cents: number): string {
 function fromAddress(): string {
   // Em produção, use um endereço do domínio verificado no Resend.
   return getEnv('EMAIL_FROM') ?? 'onboarding@resend.dev'
-}
-
-export async function sendCustomerReceipt(info: SaleInfo): Promise<void> {
-  const valor = formatBRL(info.amountCents)
-  const nome = info.customerName ?? 'Cliente'
-  await getResend().emails.send({
-    from: fromAddress(),
-    to: info.customerEmail,
-    subject: `Pagamento confirmado — ${info.planLabel}`,
-    html: `
-      <div style="font-family:Inter,Arial,sans-serif;max-width:480px;margin:0 auto;color:#1A1A1A">
-        <h2 style="color:#16A34A">Pagamento confirmado ✅</h2>
-        <p>Olá, ${nome}!</p>
-        <p>Recebemos seu pagamento com sucesso. Aqui está o resumo:</p>
-        <table style="width:100%;border-collapse:collapse;margin:16px 0">
-          <tr><td style="padding:8px 0;color:#5D6D7E">Plano</td><td style="text-align:right"><strong>${info.planLabel}</strong></td></tr>
-          <tr><td style="padding:8px 0;color:#5D6D7E">Valor</td><td style="text-align:right"><strong>${valor}</strong></td></tr>
-          ${info.isSubscription ? '<tr><td style="padding:8px 0;color:#5D6D7E">Tipo</td><td style="text-align:right">Assinatura recorrente</td></tr>' : ''}
-        </table>
-        <p>Em breve entraremos em contato para dar continuidade ao seu projeto.</p>
-        <p style="color:#5D6D7E;font-size:13px;margin-top:24px">Este é um email automático de confirmação.</p>
-      </div>
-    `,
-  })
 }
 
 export interface InscricaoConfirmacao {
