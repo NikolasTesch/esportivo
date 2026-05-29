@@ -10,6 +10,24 @@ import {
   Flag,
   Users,
 } from 'lucide-react'
+import {
+  AnimatedBadge,
+  HeroHeading,
+  HeroBody,
+  HeroActions,
+  HeroBg,
+  FadeIn,
+  SectionLabel,
+  SectionHeading,
+  StaggerGrid,
+  StaggerItem,
+  DrawPath,
+  FadePath,
+  CountUp,
+  TimelineItem,
+  QuoteBlock,
+  CtaContent,
+} from './motion'
 
 // ============================================================
 // CONTEÚDO + SEÇÕES — Template Esportivo (SPA)
@@ -59,7 +77,7 @@ const kits = [
     nome: 'Premium',
     preco: 'R$ 89',
     sub: 'add-on',
-    desc: 'Para quem quer levar a lembrança completa do dia. Soma à inscrição uma sacola exclusiva, viseira do evento e sua foto digital sem marca d’água.',
+    desc: "Para quem quer levar a lembrança completa do dia. Soma à inscrição uma sacola exclusiva, viseira do evento e sua foto digital sem marca d'água.",
     itens: ['Tudo do Básico', 'Sacola-mochila exclusiva do evento', 'Viseira técnica da edição', 'Pacote de fotos digitais em alta resolução'],
     destaque: true,
   },
@@ -73,31 +91,38 @@ const kits = [
   },
 ]
 
+const stats = [
+  { to: 8, prefix: '+', suffix: ' mil', label: 'corredores na última edição' },
+  { to: 240, prefix: 'R$ ', suffix: ' mil', label: 'doados ao instituto desde 2021' },
+  { to: 100, prefix: '', suffix: '%', label: 'do percurso com suporte médico' },
+  { to: 3, prefix: '', suffix: '', label: 'distâncias para todos os níveis' },
+]
+
 // ---- Seções fixas ----
 
 export function Hero() {
   return (
     <section className="relative overflow-hidden px-6 py-24 sm:py-32">
-      <span className="pointer-events-none absolute -right-10 top-1/2 -translate-y-1/2 select-none text-[42vw] font-extrabold italic leading-none text-white/[0.03]" aria-hidden>
+      <HeroBg className="pointer-events-none absolute -right-10 top-1/2 -translate-y-1/2 select-none text-[42vw] font-extrabold italic leading-none text-white/[0.03]">
         21K
-      </span>
+      </HeroBg>
       <div className="relative mx-auto max-w-6xl">
-        <p className="mb-6 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
+        <AnimatedBadge className="mb-6 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
           <HeartHandshake size={16} /> Corrida beneficente · Florianópolis · 12 de julho de 2026
-        </p>
-        <h1 className="lp-rise text-6xl font-extrabold uppercase italic leading-[0.88] tracking-[-0.02em] sm:text-8xl lg:text-[8.5rem]">
+        </AnimatedBadge>
+        <HeroHeading className="lp-rise text-6xl font-extrabold uppercase italic leading-[0.88] tracking-[-0.02em] sm:text-8xl lg:text-[8.5rem]">
           Corra por
           <br />
           <span className="text-[#D6FF3F]">uma causa</span>
           <br />
           que move
-        </h1>
-        <p className="mt-8 max-w-xl text-base leading-relaxed text-white/60">
+        </HeroHeading>
+        <HeroBody className="mt-8 max-w-xl text-base leading-relaxed text-white/60">
           5K, 10K e 21K à beira-mar para fortalecer a conscientização em
           saúde mental. Cada inscrição apoia o Instituto Reviva. Vagas
           limitadas por lote.
-        </p>
-        <div className="mt-10 flex flex-col gap-4 sm:flex-row">
+        </HeroBody>
+        <HeroActions className="mt-10 flex flex-col gap-4 sm:flex-row">
           <a href={INSCRICAO} className="group inline-flex items-center justify-center gap-3 bg-[#D6FF3F] px-9 py-5 text-sm font-extrabold uppercase tracking-[0.16em] text-black transition-transform hover:-translate-y-0.5">
             Quero me inscrever
             <ArrowRight size={18} className="transition-transform group-hover:translate-x-1" />
@@ -105,7 +130,7 @@ export function Hero() {
           <a href="#sobre" className="inline-flex items-center justify-center border border-white/25 px-9 py-5 text-sm font-bold uppercase tracking-[0.16em] transition-colors hover:border-[#D6FF3F] hover:text-[#D6FF3F]">
             Sobre o projeto
           </a>
-        </div>
+        </HeroActions>
       </div>
     </section>
   )
@@ -115,15 +140,15 @@ export function DepoimentosEsporte() {
   return (
     <section className="mx-auto grid max-w-6xl gap-px bg-white/10 px-0 sm:grid-cols-2">
       {[
-        ['Correr por uma causa muda tudo. Voltei a treinar e ainda ajudei o instituto. Não tem preço.', 'Letícia M.', '21K · 2025'],
-        ['Cruzei minha primeira meia aqui. A roda de conversa no fim me marcou tanto quanto a medalha.', 'Anderson T.', '21K · 2025'],
-      ].map(([quote, autor, tag]) => (
-        <div key={autor} className="bg-[#0B0B0C] p-10 sm:p-14">
-          <p className="text-2xl font-semibold leading-snug sm:text-3xl">“{quote}”</p>
+        ['Correr por uma causa muda tudo. Voltei a treinar e ainda ajudei o instituto. Não tem preço.', 'Letícia M.', '21K · 2025', -1],
+        ['Cruzei minha primeira meia aqui. A roda de conversa no fim me marcou tanto quanto a medalha.', 'Anderson T.', '21K · 2025', 1],
+      ].map(([quote, autor, tag, dir]) => (
+        <QuoteBlock key={autor as string} direction={dir as 1 | -1} className="bg-[#0B0B0C] p-10 sm:p-14">
+          <p className="text-2xl font-semibold leading-snug sm:text-3xl">"{quote}"</p>
           <p className="mt-6 text-xs font-bold uppercase tracking-[0.25em] text-white/50">
             {autor} · <span className="text-[#D6FF3F]">{tag}</span>
           </p>
-        </div>
+        </QuoteBlock>
       ))}
     </section>
   )
@@ -132,7 +157,7 @@ export function DepoimentosEsporte() {
 export function CtaFinal() {
   return (
     <section className="bg-[#D6FF3F] px-6 py-24 text-black">
-      <div className="mx-auto max-w-6xl text-center">
+      <CtaContent className="mx-auto max-w-6xl text-center">
         <p className="mb-5 text-xs font-extrabold uppercase tracking-[0.35em]">
           Lote promocional encerra em breve
         </p>
@@ -155,7 +180,7 @@ export function CtaFinal() {
             <Clock size={14} /> 12.07.2026 · largadas a partir das 06h
           </span>
         </div>
-      </div>
+      </CtaContent>
     </section>
   )
 }
@@ -166,15 +191,15 @@ function Sobre() {
   return (
     <section id="sobre" className="border-y border-white/10 bg-white/[0.02]">
       <div className="mx-auto max-w-6xl px-6 py-24">
-        <p className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
+        <SectionLabel className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
           <HeartHandshake size={16} /> Sobre o projeto
-        </p>
-        <h2 className="max-w-3xl text-4xl font-extrabold uppercase italic leading-[0.95] tracking-tight sm:text-6xl">
+        </SectionLabel>
+        <SectionHeading className="max-w-3xl text-4xl font-extrabold uppercase italic leading-[0.95] tracking-tight sm:text-6xl">
           Mais que uma corrida<span className="text-[#FF5A1F]">.</span> Um
           movimento de consciência<span className="text-[#FF5A1F]">.</span>
-        </h2>
+        </SectionHeading>
         <div className="mt-10 grid gap-12 lg:grid-cols-[1.4fr_1fr]">
-          <div className="space-y-5 text-base leading-relaxed text-white/65">
+          <FadeIn delay={0.1} className="space-y-5 text-base leading-relaxed text-white/65">
             <p>
               A <strong className="text-white">Corrida pela Consciência</strong> nasceu
               de um propósito simples: usar o esporte para abrir conversas
@@ -194,24 +219,19 @@ function Sobre() {
               tem o mesmo peso aqui. O que move esse projeto é a presença —
               de cada pessoa que decide aparecer.
             </p>
-          </div>
-          <div className="grid grid-cols-2 gap-px self-start bg-white/10">
-            {[
-              ['+8 mil', 'corredores na última edição'],
-              ['R$ 240 mil', 'doados ao instituto desde 2021'],
-              ['100%', 'do percurso com suporte médico'],
-              ['3', 'distâncias para todos os níveis'],
-            ].map(([num, label]) => (
-              <div key={label} className="bg-[#0B0B0C] p-7">
+          </FadeIn>
+          <StaggerGrid className="grid grid-cols-2 gap-px self-start bg-white/10">
+            {stats.map(({ to, prefix, suffix, label }) => (
+              <StaggerItem key={label} className="bg-[#0B0B0C] p-7">
                 <p className="text-3xl font-extrabold italic tracking-tight text-[#D6FF3F]">
-                  {num}
+                  <CountUp to={to} prefix={prefix} suffix={suffix} />
                 </p>
                 <p className="mt-2 text-xs font-semibold uppercase tracking-[0.15em] text-white/50">
                   {label}
                 </p>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerGrid>
         </div>
       </div>
     </section>
@@ -227,21 +247,23 @@ function Percurso() {
   return (
     <section id="percurso" className="border-b border-white/10">
       <div className="mx-auto max-w-6xl px-6 py-24">
-        <p className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
+        <SectionLabel className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
           <MapPin size={16} /> Percurso
-        </p>
+        </SectionLabel>
         <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
-          <h2 className="text-4xl font-extrabold uppercase italic tracking-tight sm:text-5xl">
+          <SectionHeading className="text-4xl font-extrabold uppercase italic tracking-tight sm:text-5xl">
             A rota à beira-mar<span className="text-[#FF5A1F]">.</span>
-          </h2>
-          <p className="max-w-md text-sm leading-relaxed text-white/55">
-            Largada e chegada na Av. Beira-Mar Norte. Trajeto plano, asfaltado
-            e 100% fechado para o trânsito, com hidratação e suporte ao longo
-            de toda a orla.
-          </p>
+          </SectionHeading>
+          <FadeIn delay={0.15} className="max-w-md text-sm leading-relaxed text-white/55">
+            <p>
+              Largada e chegada na Av. Beira-Mar Norte. Trajeto plano, asfaltado
+              e 100% fechado para o trânsito, com hidratação e suporte ao longo
+              de toda a orla.
+            </p>
+          </FadeIn>
         </div>
 
-        <div className="overflow-hidden border border-white/10 bg-[#0B0B0C]">
+        <FadeIn className="overflow-hidden border border-white/10 bg-[#0B0B0C]">
           <svg
             viewBox="0 0 900 360"
             className="h-auto w-full"
@@ -254,13 +276,12 @@ function Percurso() {
               </pattern>
             </defs>
             <rect width="900" height="360" fill="url(#grid)" />
-            {/* faixa do mar */}
             <rect x="0" y="288" width="900" height="72" fill="#D6FF3F" fillOpacity="0.05" />
             <text x="24" y="332" fill="#ffffff" fillOpacity="0.25" fontSize="13" fontWeight="700" letterSpacing="3">
               OCEANO ATLÂNTICO
             </text>
-            {/* traçado da rota */}
-            <path
+            {/* dashed orange path fades in */}
+            <FadePath
               d="M70 250 C 180 250, 180 110, 320 110 S 520 60, 620 130 S 800 150, 830 250"
               fill="none"
               stroke="#FF5A1F"
@@ -268,24 +289,22 @@ function Percurso() {
               strokeLinecap="round"
               strokeDasharray="2 16"
             />
-            <path
+            {/* solid green path draws itself */}
+            <DrawPath
               d="M70 250 C 180 250, 180 110, 320 110 S 520 60, 620 130 S 800 150, 830 250"
               fill="none"
               stroke="#D6FF3F"
               strokeWidth="4"
               strokeLinecap="round"
             />
-            {/* largada */}
             <circle cx="70" cy="250" r="11" fill="#D6FF3F" />
             <text x="70" y="290" fill="#ffffff" fontSize="13" fontWeight="800" textAnchor="middle">
               LARGADA
             </text>
-            {/* virada */}
             <circle cx="620" cy="130" r="9" fill="#ffffff" />
             <text x="620" y="105" fill="#ffffff" fillOpacity="0.7" fontSize="12" fontWeight="700" textAnchor="middle">
               VIRADA
             </text>
-            {/* hidratação */}
             {hidratacao.map((h) => (
               <g key={h.label}>
                 <circle cx={h.x} cy={h.y} r="7" fill="none" stroke="#FF5A1F" strokeWidth="3" />
@@ -294,15 +313,14 @@ function Percurso() {
                 </text>
               </g>
             ))}
-            {/* chegada */}
             <circle cx="830" cy="250" r="11" fill="#FF5A1F" />
             <text x="830" y="290" fill="#ffffff" fontSize="13" fontWeight="800" textAnchor="middle">
               CHEGADA
             </text>
           </svg>
-        </div>
+        </FadeIn>
 
-        <div className="mt-px grid grid-cols-1 gap-px bg-white/10 sm:grid-cols-3">
+        <StaggerGrid className="mt-px grid grid-cols-1 gap-px bg-white/10 sm:grid-cols-3">
           {(
             [
               { Icon: Flag, t: 'Largada & chegada', d: 'Arena única na Av. Beira-Mar Norte' },
@@ -310,13 +328,13 @@ function Percurso() {
               { Icon: HeartHandshake, t: 'Suporte', d: 'Equipe médica e resgate em todo o trajeto' },
             ] as const
           ).map(({ Icon, t, d }) => (
-            <div key={t} className="bg-[#0B0B0C] p-7">
+            <StaggerItem key={t} className="bg-[#0B0B0C] p-7">
               <Icon size={22} className="text-[#D6FF3F]" />
               <h3 className="mt-4 text-base font-bold uppercase tracking-wide">{t}</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/55">{d}</p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGrid>
       </div>
     </section>
   )
@@ -326,22 +344,24 @@ function Categorias() {
   return (
     <section id="categorias" className="border-b border-white/10 bg-white/[0.02]">
       <div className="mx-auto max-w-6xl px-6 py-24">
-        <p className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
+        <SectionLabel className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
           <Users size={16} /> Categorias
-        </p>
+        </SectionLabel>
         <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
-          <h2 className="text-4xl font-extrabold uppercase italic tracking-tight sm:text-5xl">
+          <SectionHeading className="text-4xl font-extrabold uppercase italic tracking-tight sm:text-5xl">
             Escolha sua prova<span className="text-[#FF5A1F]">.</span>
-          </h2>
-          <p className="max-w-md text-sm leading-relaxed text-white/55">
-            Cada distância tem premiação separada por gênero e faixa etária.
-            Você escolhe a categoria na inscrição.
-          </p>
+          </SectionHeading>
+          <FadeIn delay={0.15} className="max-w-md text-sm leading-relaxed text-white/55">
+            <p>
+              Cada distância tem premiação separada por gênero e faixa etária.
+              Você escolhe a categoria na inscrição.
+            </p>
+          </FadeIn>
         </div>
 
-        <div className="grid grid-cols-1 gap-px bg-white/10 md:grid-cols-3">
+        <StaggerGrid className="grid grid-cols-1 gap-px bg-white/10 md:grid-cols-3">
           {distancias.map((d) => (
-            <div key={d.km} className="bg-[#0B0B0C] p-9 sm:p-10">
+            <StaggerItem key={d.km} className="bg-[#0B0B0C] p-9 sm:p-10">
               <span className="block text-6xl font-extrabold italic tracking-tighter text-[#D6FF3F] sm:text-7xl">
                 {d.km}
               </span>
@@ -366,17 +386,19 @@ function Categorias() {
                   ))}
                 </div>
               </div>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGrid>
 
-        <a
-          href={INSCRICAO}
-          className="mt-10 inline-flex items-center gap-3 bg-[#D6FF3F] px-8 py-4 text-xs font-extrabold uppercase tracking-[0.2em] text-black transition-transform hover:-translate-y-0.5"
-        >
-          Escolher categoria e inscrever
-          <ArrowRight size={16} />
-        </a>
+        <FadeIn delay={0.1} className="mt-10">
+          <a
+            href={INSCRICAO}
+            className="inline-flex items-center gap-3 bg-[#D6FF3F] px-8 py-4 text-xs font-extrabold uppercase tracking-[0.2em] text-black transition-transform hover:-translate-y-0.5"
+          >
+            Escolher categoria e inscrever
+            <ArrowRight size={16} />
+          </a>
+        </FadeIn>
       </div>
     </section>
   )
@@ -388,26 +410,31 @@ function Kits() {
       <div className="mx-auto max-w-6xl px-6 py-24">
         <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
+            <SectionLabel className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
               <Zap size={16} /> Kits
-            </p>
-            <h2 className="text-4xl font-extrabold uppercase italic tracking-tight sm:text-5xl">
+            </SectionLabel>
+            <SectionHeading className="text-4xl font-extrabold uppercase italic tracking-tight sm:text-5xl">
               Escolha seu kit<span className="text-[#FF5A1F]">.</span>
-            </h2>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/55">
-              A inscrição já garante o kit Básico completo para correr. Os
-              add-ons Premium e Embaixador são opcionais — e o Embaixador
-              ainda transforma seu kit em uma doação direta à causa.
-            </p>
+            </SectionHeading>
+            <FadeIn delay={0.1} className="mt-4 max-w-xl text-sm leading-relaxed text-white/55">
+              <p>
+                A inscrição já garante o kit Básico completo para correr. Os
+                add-ons Premium e Embaixador são opcionais — e o Embaixador
+                ainda transforma seu kit em uma doação direta à causa.
+              </p>
+            </FadeIn>
           </div>
-          <span className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-[#FF5A1F]">
+          <FadeIn className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-[#FF5A1F]">
             <span className="lp-blink h-2 w-2 rounded-full bg-[#FF5A1F]" />
             Add-ons só até o fim do lote
-          </span>
+          </FadeIn>
         </div>
-        <div className="grid grid-cols-1 gap-px bg-white/10 md:grid-cols-3">
+        <StaggerGrid className="grid grid-cols-1 gap-px bg-white/10 md:grid-cols-3">
           {kits.map((k) => (
-            <div key={k.nome} className={`flex flex-col p-9 sm:p-10 ${k.destaque ? 'bg-[#D6FF3F] text-black' : 'bg-[#0B0B0C] text-white'}`}>
+            <StaggerItem
+              key={k.nome}
+              className={`flex flex-col p-9 sm:p-10 ${k.destaque ? 'bg-[#D6FF3F] text-black' : 'bg-[#0B0B0C] text-white'}`}
+            >
               <div className="flex items-baseline justify-between">
                 <h3 className="text-2xl font-bold uppercase tracking-wide">{k.nome}</h3>
                 {k.destaque && (
@@ -432,9 +459,9 @@ function Kits() {
               <a href={INSCRICAO} className={`mt-8 px-6 py-4 text-center text-xs font-extrabold uppercase tracking-[0.2em] transition-transform hover:-translate-y-0.5 ${k.destaque ? 'bg-black text-[#D6FF3F]' : 'border border-white/25 hover:border-[#D6FF3F] hover:text-[#D6FF3F]'}`}>
                 {k.preco === 'Incluído' ? 'Inscrever-se' : `Levar ${k.nome}`}
               </a>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGrid>
       </div>
     </section>
   )
@@ -443,19 +470,21 @@ function Kits() {
 function Cronograma() {
   return (
     <section id="cronograma" className="mx-auto max-w-4xl px-6 py-24">
-      <p className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
+      <SectionLabel className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
         <Clock size={16} /> Cronograma
-      </p>
-      <h2 className="mb-14 text-4xl font-extrabold uppercase italic tracking-tight sm:text-5xl">
+      </SectionLabel>
+      <SectionHeading className="mb-14 text-4xl font-extrabold uppercase italic tracking-tight sm:text-5xl">
         O dia da corrida<span className="text-[#FF5A1F]">.</span>
-      </h2>
+      </SectionHeading>
       <div className="border-l-2 border-white/15">
-        {cronograma.map(([hora, evento]) => (
-          <div key={hora} className="relative flex gap-6 pb-9 pl-8 last:pb-0">
-            <span className="absolute -left-[7px] top-1.5 h-3 w-3 rounded-full bg-[#D6FF3F]" />
-            <span className="w-16 shrink-0 text-2xl font-extrabold tabular-nums tracking-tight text-[#D6FF3F]">{hora}</span>
-            <p className="pt-1 text-sm leading-relaxed text-white/70">{evento}</p>
-          </div>
+        {cronograma.map(([hora, evento], i) => (
+          <TimelineItem key={hora} index={i}>
+            <div className="relative flex gap-6 pb-9 pl-8 last:pb-0">
+              <span className="absolute -left-[7px] top-1.5 h-3 w-3 rounded-full bg-[#D6FF3F]" />
+              <span className="w-16 shrink-0 text-2xl font-extrabold tabular-nums tracking-tight text-[#D6FF3F]">{hora}</span>
+              <p className="pt-1 text-sm leading-relaxed text-white/70">{evento}</p>
+            </div>
+          </TimelineItem>
         ))}
       </div>
     </section>
@@ -466,21 +495,21 @@ function Motivos() {
   return (
     <section id="motivos" className="border-y border-white/10 bg-white/[0.02]">
       <div className="mx-auto max-w-6xl px-6 py-24">
-        <p className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
+        <SectionLabel className="mb-5 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
           <Award size={16} /> Por que correr
-        </p>
-        <h2 className="mb-12 text-4xl font-extrabold uppercase italic tracking-tight sm:text-5xl">
+        </SectionLabel>
+        <SectionHeading className="mb-12 text-4xl font-extrabold uppercase italic tracking-tight sm:text-5xl">
           Por que correr essa
-        </h2>
-        <div className="grid grid-cols-1 gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
+        </SectionHeading>
+        <StaggerGrid className="grid grid-cols-1 gap-px bg-white/10 sm:grid-cols-2 lg:grid-cols-4">
           {motivos.map(([t, d]) => (
-            <div key={t} className="bg-[#0B0B0C] p-8">
+            <StaggerItem key={t} className="bg-[#0B0B0C] p-8">
               <Award size={26} className="text-[#D6FF3F]" />
               <h3 className="mt-5 text-lg font-bold uppercase tracking-wide">{t}</h3>
               <p className="mt-2 text-sm leading-relaxed text-white/55">{d}</p>
-            </div>
+            </StaggerItem>
           ))}
-        </div>
+        </StaggerGrid>
       </div>
     </section>
   )
