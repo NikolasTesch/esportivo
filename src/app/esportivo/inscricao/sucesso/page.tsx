@@ -96,7 +96,7 @@ export default async function SucessoPage({
       {row && !pago && !cancelado && (
         <p className="mt-5 text-base leading-relaxed text-white/60">
           Recebemos sua inscrição, {row.nome.split(' ')[0]}. O pagamento
-          {row.provider === 'infinitepay' ? ' via Pix' : ''} está sendo
+          {row.provider === 'pix' ? ' via Pix' : ''} está sendo
           processado — assim que for reconhecido, sua vaga é confirmada e
           você recebe um e-mail em{' '}
           <strong className="text-white">{row.email}</strong>. Pode atualizar
@@ -123,7 +123,7 @@ export default async function SucessoPage({
           <Linha k="Kit" v={row.kit} />
           <Linha
             k="Pagamento"
-            v={row.provider === 'infinitepay' ? 'Pix (InfinitePay)' : 'Cartão (Stripe)'}
+            v={row.provider === 'pix' ? 'Pix' : 'Cartão de crédito'}
           />
           <Linha
             k="Valor"

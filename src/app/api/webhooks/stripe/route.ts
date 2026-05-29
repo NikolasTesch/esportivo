@@ -18,6 +18,9 @@ async function confirmarInscricao(
 ): Promise<boolean> {
   const inscricaoId = s.metadata?.inscricao_id
   if (!inscricaoId) return false
+  // Pix é assíncrono: checkout.session.completed dispara antes da confirmação.
+  // Só confirma quando o pagamento está de fato recebido.
+  if (s.payment_status !== 'paid') return true
 
   let metodo = 'card'
   try {
@@ -97,7 +100,9 @@ export async function POST(req: NextRequest) {
 
   try {
     switch (event.type) {
-      case 'checkout.session.completed': {
+      case 'checkout.session.completed':
+      // Pix é assíncrono: a confirmação real chega via async_payment_succeeded.
+      case 'checkout.session.async_payment_succeeded': {
         const s = event.data.object as Stripe.Checkout.Session
         // Inscrição da corrida: confirma no Supabase + e-mail próprio.
         if (await confirmarInscricao(s)) break

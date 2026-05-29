@@ -1,5 +1,6 @@
 'use client'
 
+import { AnimatePresence, motion } from 'framer-motion'
 import { useMemo, useState } from 'react'
 import { Zap } from 'lucide-react'
 import {
@@ -20,6 +21,8 @@ const inputErrCls =
 const labelCls =
   'mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-white/45'
 
+const E = [0.16, 1, 0.3, 1] as const
+
 function maskCPF(raw: string): string {
   const n = raw.replace(/\D/g, '').slice(0, 11)
   if (n.length <= 3) return n
@@ -38,6 +41,19 @@ function maskPhone(raw: string): string {
 
 function faixaLabel(f: string): string {
   return f.replace('-', '–')
+}
+
+function FieldSection({ children, index }: { children: React.ReactNode; index: number }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-40px' }}
+      transition={{ duration: 0.55, ease: E, delay: index * 0.07 }}
+    >
+      {children}
+    </motion.div>
+  )
 }
 
 export function InscricaoForm() {
@@ -117,223 +133,278 @@ export function InscricaoForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-10">
-      {error && (
-        <p className="border border-[#FF5A1F]/40 bg-[#FF5A1F]/10 px-4 py-3 text-sm text-[#FF5A1F]">
-          {error}
-        </p>
-      )}
-
-      <fieldset className="space-y-6">
-        <legend className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
-          1 · Sua prova
-        </legend>
-        <div className="grid gap-6 sm:grid-cols-3">
-          <div>
-            <label className={labelCls} htmlFor="distancia">Distância</label>
-            <select id="distancia" name="distancia" required className={inputCls} defaultValue="">
-              <option value="" disabled>Selecione</option>
-              {DISTANCIAS.map((d) => (
-                <option key={d} value={d}>{d}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={labelCls} htmlFor="genero">Gênero</label>
-            <select
-              id="genero"
-              name="genero"
-              required
-              className={inputCls}
-              value={genero}
-              onChange={(e) => setGenero(e.target.value as (typeof GENEROS)[number])}
-            >
-              {GENEROS.map((g) => (
-                <option key={g} value={g}>
-                  {g === 'masculino' ? 'Masculino' : 'Feminino'}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={labelCls} htmlFor="faixa_etaria">Faixa etária</label>
-            <select id="faixa_etaria" name="faixa_etaria" required className={inputCls} defaultValue="">
-              <option value="" disabled>Selecione</option>
-              {FAIXAS.map((f) => (
-                <option key={f} value={f}>{faixaLabel(f)} anos</option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset className="space-y-6">
-        <legend className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
-          2 · Camisa & kit
-        </legend>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div>
-            <label className={labelCls} htmlFor="tamanho_camisa">
-              Tamanho da camisa ({genero === 'masculino' ? 'masculino' : 'baby look'})
-            </label>
-            <select id="tamanho_camisa" name="tamanho_camisa" required className={inputCls} defaultValue="">
-              <option value="" disabled>Selecione</option>
-              {tamanhos.map((t) => (
-                <option key={t} value={t}>{t}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className={labelCls} htmlFor="kit">Kit</label>
-            <select
-              id="kit"
-              name="kit"
-              required
-              className={inputCls}
-              value={kit}
-              onChange={(e) => setKit(e.target.value)}
-            >
-              {KITS.map((k) => (
-                <option key={k.id} value={k.id}>{k.label}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Kit context panel */}
-        {kitInfo && (
-          <div className="border border-white/10 bg-[#0B0B0C] p-5">
-            <p className="mb-3 text-xs text-white/50">{kitInfo.desc}</p>
-            <ul className="space-y-1.5">
-              {kitInfo.itens.map((item) => (
-                <li key={item} className="flex items-start gap-2 text-xs text-white/70">
-                  <Zap size={12} className="mt-0.5 shrink-0 text-[#D6FF3F]" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
+      <AnimatePresence>
+        {error && (
+          <motion.p
+            key="error"
+            initial={{ opacity: 0, y: -8, height: 0 }}
+            animate={{ opacity: 1, y: 0, height: 'auto' }}
+            exit={{ opacity: 0, y: -8, height: 0 }}
+            transition={{ duration: 0.3, ease: E }}
+            className="border border-[#FF5A1F]/40 bg-[#FF5A1F]/10 px-4 py-3 text-sm text-[#FF5A1F]"
+          >
+            {error}
+          </motion.p>
         )}
-      </fieldset>
+      </AnimatePresence>
 
-      <fieldset className="space-y-6">
-        <legend className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
-          3 · Seus dados
-        </legend>
-        <div className="grid gap-6 sm:grid-cols-2">
-          <div className="sm:col-span-2">
-            <label className={labelCls} htmlFor="nome">Nome completo</label>
-            <input id="nome" name="nome" required minLength={3} className={inputCls} placeholder="Como aparece no documento" />
-          </div>
-          <div>
-            <label className={labelCls} htmlFor="email">E-mail</label>
-            <input id="email" name="email" type="email" required className={inputCls} placeholder="voce@email.com" />
-          </div>
-          <div>
-            <label className={labelCls} htmlFor="telefone">Telefone / WhatsApp</label>
-            <input
-              id="telefone"
-              name="telefone"
-              required
-              value={telefone}
-              onChange={(e) => setTelefone(maskPhone(e.target.value))}
-              onBlur={(e) => validateField('telefone', e.target.value)}
-              className={fieldErrors.telefone ? inputErrCls : inputCls}
-              placeholder="(48) 99999-9999"
-              inputMode="tel"
-            />
-            {fieldErrors.telefone && (
-              <p className="mt-1 text-xs text-[#FF5A1F]">{fieldErrors.telefone}</p>
-            )}
-          </div>
-          <div>
-            <label className={labelCls} htmlFor="cpf">CPF</label>
-            <input
-              id="cpf"
-              name="cpf"
-              required
-              value={cpf}
-              onChange={(e) => setCpf(maskCPF(e.target.value))}
-              onBlur={(e) => validateField('cpf', e.target.value)}
-              className={fieldErrors.cpf ? inputErrCls : inputCls}
-              placeholder="000.000.000-00"
-              inputMode="numeric"
-            />
-            {fieldErrors.cpf && (
-              <p className="mt-1 text-xs text-[#FF5A1F]">{fieldErrors.cpf}</p>
-            )}
-          </div>
-          <div>
-            <label className={labelCls} htmlFor="data_nascimento">Data de nascimento</label>
-            <input
-              id="data_nascimento"
-              name="data_nascimento"
-              type="date"
-              required
-              min={minBirthDate}
-              max={maxBirthDate}
-              className={inputCls}
-            />
-            <p className="mt-1 text-[11px] text-white/30">Participantes devem ter 16 anos ou mais na data do evento.</p>
-          </div>
-        </div>
-      </fieldset>
-
-      <fieldset className="space-y-6">
-        <legend className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
-          4 · Forma de pagamento
-        </legend>
-        <div className="grid gap-px bg-white/10 sm:grid-cols-2">
-          {([
-            { id: 'cartao', titulo: 'Cartão de crédito', sub: 'Stripe · até 12x · aprovação na hora' },
-            { id: 'pix', titulo: 'Pix', sub: 'InfinitePay · pagamento à vista · sem taxa' },
-          ] as const).map((m) => {
-            const ativo = metodo === m.id
-            return (
-              <button
-                type="button"
-                key={m.id}
-                onClick={() => setMetodo(m.id)}
-                aria-pressed={ativo}
-                className={`flex flex-col items-start p-6 text-left transition-colors ${
-                  ativo
-                    ? 'bg-[#D6FF3F] text-black'
-                    : 'bg-[#0B0B0C] text-white hover:bg-white/[0.04]'
-                }`}
+      <FieldSection index={0}>
+        <fieldset className="space-y-6">
+          <legend className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
+            1 · Sua prova
+          </legend>
+          <div className="grid gap-6 sm:grid-cols-3">
+            <div>
+              <label className={labelCls} htmlFor="distancia">Distância</label>
+              <select id="distancia" name="distancia" required className={inputCls} defaultValue="">
+                <option value="" disabled>Selecione</option>
+                {DISTANCIAS.map((d) => (
+                  <option key={d} value={d}>{d}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="genero">Gênero</label>
+              <select
+                id="genero"
+                name="genero"
+                required
+                className={inputCls}
+                value={genero}
+                onChange={(e) => setGenero(e.target.value as (typeof GENEROS)[number])}
               >
-                <span className="text-lg font-bold uppercase tracking-wide">
-                  {m.titulo}
-                </span>
-                <span
-                  className={`mt-1 text-xs ${ativo ? 'text-black/70' : 'text-white/45'}`}
-                >
-                  {m.sub}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-      </fieldset>
+                {GENEROS.map((g) => (
+                  <option key={g} value={g}>
+                    {g === 'masculino' ? 'Masculino' : 'Feminino'}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="faixa_etaria">Faixa etária</label>
+              <select id="faixa_etaria" name="faixa_etaria" required className={inputCls} defaultValue="">
+                <option value="" disabled>Selecione</option>
+                {FAIXAS.map((f) => (
+                  <option key={f} value={f}>{faixaLabel(f)} anos</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </fieldset>
+      </FieldSection>
 
-      <div className="flex flex-col gap-5 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between">
+      <FieldSection index={1}>
+        <fieldset className="space-y-6">
+          <legend className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
+            2 · Camisa & kit
+          </legend>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div>
+              <label className={labelCls} htmlFor="tamanho_camisa">
+                Tamanho da camisa ({genero === 'masculino' ? 'masculino' : 'baby look'})
+              </label>
+              <select id="tamanho_camisa" name="tamanho_camisa" required className={inputCls} defaultValue="">
+                <option value="" disabled>Selecione</option>
+                {tamanhos.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="kit">Kit</label>
+              <select
+                id="kit"
+                name="kit"
+                required
+                className={inputCls}
+                value={kit}
+                onChange={(e) => setKit(e.target.value)}
+              >
+                {KITS.map((k) => (
+                  <option key={k.id} value={k.id}>{k.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {kitInfo && (
+              <motion.div
+                key={kit}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.3, ease: E }}
+                className="border border-white/10 bg-[#0B0B0C] p-5"
+              >
+                <p className="mb-3 text-xs text-white/50">{kitInfo.desc}</p>
+                <ul className="space-y-1.5">
+                  {kitInfo.itens.map((item) => (
+                    <li key={item} className="flex items-start gap-2 text-xs text-white/70">
+                      <Zap size={12} className="mt-0.5 shrink-0 text-[#D6FF3F]" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </fieldset>
+      </FieldSection>
+
+      <FieldSection index={2}>
+        <fieldset className="space-y-6">
+          <legend className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
+            3 · Seus dados
+          </legend>
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="sm:col-span-2">
+              <label className={labelCls} htmlFor="nome">Nome completo</label>
+              <input id="nome" name="nome" required minLength={3} className={inputCls} placeholder="Como aparece no documento" />
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="email">E-mail</label>
+              <input id="email" name="email" type="email" required className={inputCls} placeholder="voce@email.com" />
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="telefone">Telefone / WhatsApp</label>
+              <input
+                id="telefone"
+                name="telefone"
+                required
+                value={telefone}
+                onChange={(e) => setTelefone(maskPhone(e.target.value))}
+                onBlur={(e) => validateField('telefone', e.target.value)}
+                className={fieldErrors.telefone ? inputErrCls : inputCls}
+                placeholder="(48) 99999-9999"
+                inputMode="tel"
+              />
+              {fieldErrors.telefone && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-1 text-xs text-[#FF5A1F]"
+                >
+                  {fieldErrors.telefone}
+                </motion.p>
+              )}
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="cpf">CPF</label>
+              <input
+                id="cpf"
+                name="cpf"
+                required
+                value={cpf}
+                onChange={(e) => setCpf(maskCPF(e.target.value))}
+                onBlur={(e) => validateField('cpf', e.target.value)}
+                className={fieldErrors.cpf ? inputErrCls : inputCls}
+                placeholder="000.000.000-00"
+                inputMode="numeric"
+              />
+              {fieldErrors.cpf && (
+                <motion.p
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-1 text-xs text-[#FF5A1F]"
+                >
+                  {fieldErrors.cpf}
+                </motion.p>
+              )}
+            </div>
+            <div>
+              <label className={labelCls} htmlFor="data_nascimento">Data de nascimento</label>
+              <input
+                id="data_nascimento"
+                name="data_nascimento"
+                type="date"
+                required
+                min={minBirthDate}
+                max={maxBirthDate}
+                className={inputCls}
+              />
+              <p className="mt-1 text-[11px] text-white/30">Participantes devem ter 16 anos ou mais na data do evento.</p>
+            </div>
+          </div>
+        </fieldset>
+      </FieldSection>
+
+      <FieldSection index={3}>
+        <fieldset className="space-y-6">
+          <legend className="text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
+            4 · Forma de pagamento
+          </legend>
+          <div className="grid gap-px bg-white/10 sm:grid-cols-2">
+            {([
+              { id: 'cartao', titulo: 'Cartão de crédito', sub: 'Stripe · até 12x · aprovação na hora' },
+              { id: 'pix', titulo: 'Pix', sub: 'InfinitePay · pagamento à vista · sem taxa' },
+            ] as const).map((m) => {
+              const ativo = metodo === m.id
+              return (
+                <motion.button
+                  type="button"
+                  key={m.id}
+                  onClick={() => setMetodo(m.id)}
+                  aria-pressed={ativo}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  transition={{ duration: 0.18 }}
+                  className={`flex flex-col items-start p-6 text-left transition-colors ${
+                    ativo
+                      ? 'bg-[#D6FF3F] text-black'
+                      : 'bg-[#0B0B0C] text-white hover:bg-white/[0.04]'
+                  }`}
+                >
+                  <span className="text-lg font-bold uppercase tracking-wide">
+                    {m.titulo}
+                  </span>
+                  <span
+                    className={`mt-1 text-xs ${ativo ? 'text-black/70' : 'text-white/45'}`}
+                  >
+                    {m.sub}
+                  </span>
+                </motion.button>
+              )
+            })}
+          </div>
+        </fieldset>
+      </FieldSection>
+
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: '-40px' }}
+        transition={{ duration: 0.55, ease: E, delay: 0.28 }}
+        className="flex flex-col gap-5 border-t border-white/10 pt-8 sm:flex-row sm:items-center sm:justify-between"
+      >
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/45">
             Total a pagar
           </p>
-          <p className="text-4xl font-extrabold italic tracking-tight text-[#D6FF3F]">
+          <motion.p
+            key={total}
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: E }}
+            className="text-4xl font-extrabold italic tracking-tight text-[#D6FF3F]"
+          >
             {formatBRL(total)}
-          </p>
+          </motion.p>
           <p className="mt-1 text-xs text-white/45">
             Categoria e tamanho são confirmados após o pagamento.
           </p>
         </div>
-        <button
+        <motion.button
           type="submit"
           disabled={loading}
-          className="inline-flex items-center justify-center gap-3 bg-[#D6FF3F] px-9 py-5 text-sm font-extrabold uppercase tracking-[0.16em] text-black transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+          whileHover={{ y: -2 }}
+          whileTap={{ scale: 0.98 }}
+          transition={{ duration: 0.18 }}
+          className="inline-flex items-center justify-center gap-3 bg-[#D6FF3F] px-9 py-5 text-sm font-extrabold uppercase tracking-[0.16em] text-black disabled:opacity-50"
         >
           {loading ? 'Redirecionando…' : 'Ir para o pagamento'}
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
     </form>
   )
 }

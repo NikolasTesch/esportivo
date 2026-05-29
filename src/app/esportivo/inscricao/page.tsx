@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { TAMANHOS, formatBRL, PRECO_BASE_CENTS } from '@/lib/esportivo'
 import { InscricaoForm } from './InscricaoForm'
+import { FadeIn, HeroBody, HeroHeading, SectionLabel } from '../motion'
 
 export const metadata: Metadata = {
   title: 'Inscrição — Corrida pela Consciência 2026',
@@ -46,48 +47,55 @@ function TabelaTamanhos({
 export default function InscricaoPage() {
   return (
     <main className="mx-auto max-w-5xl px-6 py-20">
-      <nav
-        aria-label="Trilha"
-        className="mb-10 text-[11px] font-bold uppercase tracking-[0.2em] text-white/45"
-      >
-        <Link href="/esportivo" className="hover:text-[#D6FF3F]">
-          Corrida pela Consciência
-        </Link>
-        <span className="px-2">/</span>
-        <span className="text-white">Inscrição</span>
-      </nav>
+      <FadeIn y={8} className="mb-10">
+        <nav
+          aria-label="Trilha"
+          className="text-[11px] font-bold uppercase tracking-[0.2em] text-white/45"
+        >
+          <Link href="/esportivo" className="hover:text-[#D6FF3F]">
+            Corrida pela Consciência
+          </Link>
+          <span className="px-2">/</span>
+          <span className="text-white">Inscrição</span>
+        </nav>
+      </FadeIn>
 
-      <h1 className="text-4xl font-extrabold uppercase italic leading-[0.95] tracking-tight sm:text-6xl">
+      <HeroHeading className="text-4xl font-extrabold uppercase italic leading-[0.95] tracking-tight sm:text-6xl">
         Garanta sua vaga<span className="text-[#FF5A1F]">.</span>
-      </h1>
-      <p className="mt-5 max-w-2xl text-base leading-relaxed text-white/60">
+      </HeroHeading>
+
+      <HeroBody className="mt-5 max-w-2xl text-base leading-relaxed text-white/60">
         Inscrição única de{' '}
         <strong className="text-white">{formatBRL(PRECO_BASE_CENTS)}</strong> —
         com kit Básico completo. Escolha sua categoria e o tamanho da camisa;
         tudo é confirmado assim que o pagamento for reconhecido.
-      </p>
+      </HeroBody>
 
-      <section className="mt-12">
-        <h2 className="mb-5 text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
-          Tabela de tamanhos
-        </h2>
-        <div className="grid gap-px bg-white/10 md:grid-cols-2">
-          <div className="bg-[#0B0B0C] p-1">
-            <TabelaTamanhos titulo="Masculino" linhas={TAMANHOS.masculino} />
+      <FadeIn delay={0.15} className="mt-12">
+        <section>
+          <SectionLabel className="mb-5 text-sm font-extrabold uppercase tracking-[0.25em] text-[#D6FF3F]">
+            Tabela de tamanhos
+          </SectionLabel>
+          <div className="grid gap-px bg-white/10 md:grid-cols-2">
+            <div className="bg-[#0B0B0C] p-1">
+              <TabelaTamanhos titulo="Masculino" linhas={TAMANHOS.masculino} />
+            </div>
+            <div className="bg-[#0B0B0C] p-1">
+              <TabelaTamanhos titulo="Feminino · baby look" linhas={TAMANHOS.feminino} />
+            </div>
           </div>
-          <div className="bg-[#0B0B0C] p-1">
-            <TabelaTamanhos titulo="Feminino · baby look" linhas={TAMANHOS.feminino} />
-          </div>
-        </div>
-        <p className="mt-3 text-xs text-white/40">
-          Medidas aproximadas. Em caso de dúvida entre dois tamanhos, opte
-          pelo maior.
-        </p>
-      </section>
+          <p className="mt-3 text-xs text-white/40">
+            Medidas aproximadas. Em caso de dúvida entre dois tamanhos, opte
+            pelo maior.
+          </p>
+        </section>
+      </FadeIn>
 
-      <section className="mt-14">
-        <InscricaoForm />
-      </section>
+      <FadeIn delay={0.1} className="mt-14">
+        <section>
+          <InscricaoForm />
+        </section>
+      </FadeIn>
     </main>
   )
 }

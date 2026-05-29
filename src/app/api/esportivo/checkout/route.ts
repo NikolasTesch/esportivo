@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getStripe } from '@/lib/stripe'
 import { getSupabase } from '@/lib/supabase'
 import { getEnv } from '@/lib/env'
-import { criarLinkCheckout } from '@/lib/infinitepay'
 import { InscricaoSchema, totalCents, KITS } from '@/lib/esportivo'
 
 export const runtime = 'nodejs'
@@ -24,7 +23,7 @@ export async function POST(req: NextRequest) {
   }
   const d = parsed.data
   const amount = totalCents(d.kit)
-  const provider = d.metodo === 'pix' ? 'infinitepay' : 'stripe'
+  const provider = d.metodo === 'pix' ? 'pix' : 'stripe'
 
   let supabase
   try {
@@ -73,42 +72,11 @@ export async function POST(req: NextRequest) {
   const kitLabel = KITS.find((k) => k.id === d.kit)?.label ?? 'Básico'
   const sucessoUrl = `${baseUrl}/esportivo/inscricao/sucesso?ref=${row.id}`
 
-  // ---- Pix → InfinitePay --------------------------------------------------
-  if (provider === 'infinitepay') {
-    try {
-      await supabase
-        .from('inscricoes')
-        .update({ order_nsu: row.id })
-        .eq('id', row.id)
-
-      const url = await criarLinkCheckout({
-        orderNsu: row.id,
-        amountCents: amount,
-        description: `Inscrição ${d.distancia} — Corrida pela Consciência 2026 (Kit ${kitLabel})`,
-        redirectUrl: sucessoUrl,
-        webhookUrl: `${baseUrl}/api/esportivo/webhooks/infinitepay`,
-      })
-      return NextResponse.json({ url })
-    } catch (err) {
-      console.error('infinitepay_checkout_error', err)
-      await supabase
-        .from('inscricoes')
-        .update({ status: 'cancelado' })
-        .eq('id', row.id)
-      return NextResponse.json(
-        { error: 'Não foi possível iniciar o pagamento via Pix.' },
-        { status: 500 },
-      )
-    }
-  }
-
-  // ---- Cartão → Stripe ----------------------------------------------------
+  // ---- Stripe (Cartão ou Pix) ---------------------------------------------
   try {
     const session = await getStripe().checkout.sessions.create({
       mode: 'payment',
-      // Stripe cuida do cartão; Pix vai pela InfinitePay. Fixar 'card'
-      // evita depender de Pix/boleto ativados na conta Stripe.
-      payment_method_types: ['card'],
+      payment_method_types: provider === 'pix' ? ['pix'] : ['card'],
       customer_email: d.email,
       line_items: [
         {
@@ -146,3 +114,4 @@ export async function POST(req: NextRequest) {
     )
   }
 }
+
