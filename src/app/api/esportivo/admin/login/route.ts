@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHash } from 'node:crypto'
-import { ADMIN_COOKIE, adminToken, safeEqual } from '@/lib/admin-auth'
+import {
+  ADMIN_COOKIE,
+  createSessionToken,
+  safeEqual,
+  SESSION_TTL_SECONDS,
+} from '@/lib/admin-auth'
 import { requireEnv } from '@/lib/env'
 
 const sha = (v: string) => createHash('sha256').update(v).digest('hex')
@@ -31,12 +36,12 @@ export async function POST(req: NextRequest) {
   }
 
   const res = NextResponse.json({ ok: true })
-  res.cookies.set(ADMIN_COOKIE, adminToken(), {
+  res.cookies.set(ADMIN_COOKIE, createSessionToken(), {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: 60 * 60 * 8,
+    maxAge: SESSION_TTL_SECONDS,
   })
   return res
 }

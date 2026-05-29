@@ -1,5 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getMPPayment, getMPMerchantOrder, type MPPayment } from '@/lib/mercadopago'
+import {
+  getMPPayment,
+  getMPMerchantOrder,
+  verifyWebhookSignature,
+  type MPPayment,
+} from '@/lib/mercadopago'
 import { getSupabase } from '@/lib/supabase'
 import { sendInscricaoConfirmacao, sendAdminSaleNotification } from '@/lib/email'
 
@@ -58,6 +63,19 @@ export async function POST(req: NextRequest) {
   const url = new URL(req.url)
   const topic = url.searchParams.get('topic')
   const qId = url.searchParams.get('id')
+
+  // Rejeita notificações forjadas: valida a assinatura HMAC do Mercado Pago
+  // ANTES de qualquer consulta/atualização. O id do manifest vem do query
+  // `data.id` (webhook v2) ou do `id` legado.
+  const validSignature = verifyWebhookSignature({
+    signatureHeader: req.headers.get('x-signature'),
+    requestId: req.headers.get('x-request-id'),
+    dataId: url.searchParams.get('data.id') ?? qId,
+  })
+  if (!validSignature) {
+    console.warn('mp_webhook_invalid_signature')
+    return NextResponse.json({ error: 'invalid signature' }, { status: 401 })
+  }
 
   try {
     // ── Formato legado: ?topic=payment&id=PAYMENT_ID ──────────────────────

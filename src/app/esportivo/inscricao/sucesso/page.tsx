@@ -95,9 +95,8 @@ export default async function SucessoPage({
 
       {row && !pago && !cancelado && (
         <p className="mt-5 text-base leading-relaxed text-white/60">
-          Recebemos sua inscrição, {row.nome.split(' ')[0]}. O pagamento
-          {row.provider === 'pix' ? ' via Pix' : ''} está sendo
-          processado — assim que for reconhecido, sua vaga é confirmada e
+          Recebemos sua inscrição, {row.nome.split(' ')[0]}. O pagamento está
+          sendo processado — assim que for reconhecido, sua vaga é confirmada e
           você recebe um e-mail em{' '}
           <strong className="text-white">{row.email}</strong>. Pode atualizar
           esta página em instantes.

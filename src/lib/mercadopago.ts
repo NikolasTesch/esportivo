@@ -1,6 +1,53 @@
-import { requireEnv } from './env'
+import { createHmac, timingSafeEqual } from 'node:crypto'
+import { getEnv, requireEnv } from './env'
 
 const MP_API = 'https://api.mercadopago.com'
+
+// Valida a assinatura HMAC-SHA256 que o Mercado Pago envia em toda notificação
+// (header `x-signature`). Sem isso, qualquer um poderia forjar um POST e marcar
+// uma inscrição como paga. Fail-closed: se o segredo não estiver configurado,
+// nenhuma notificação é aceita.
+//
+// Manifest documentado pelo MP: `id:<data.id>;request-id:<x-request-id>;ts:<ts>;`
+// (campos ausentes são omitidos; data.id alfanumérico vai em minúsculo).
+export function verifyWebhookSignature(params: {
+  signatureHeader: string | null
+  requestId: string | null
+  dataId: string | null
+}): boolean {
+  const secret = getEnv('MERCADOPAGO_WEBHOOK_SECRET')
+  if (!secret) return false
+
+  const { signatureHeader, requestId, dataId } = params
+  if (!signatureHeader) return false
+
+  // x-signature: "ts=1700000000,v1=abcdef0123..."
+  const parts: Record<string, string> = {}
+  for (const kv of signatureHeader.split(',')) {
+    const idx = kv.indexOf('=')
+    if (idx === -1) continue
+    parts[kv.slice(0, idx).trim()] = kv.slice(idx + 1).trim()
+  }
+  const ts = parts['ts']
+  const v1 = parts['v1']
+  if (!ts || !v1) return false
+
+  let manifest = ''
+  if (dataId) manifest += `id:${dataId.toLowerCase()};`
+  if (requestId) manifest += `request-id:${requestId};`
+  manifest += `ts:${ts};`
+
+  const expected = createHmac('sha256', secret).update(manifest).digest('hex')
+
+  try {
+    const a = Buffer.from(expected, 'hex')
+    const b = Buffer.from(v1, 'hex')
+    if (a.length !== b.length) return false
+    return timingSafeEqual(a, b)
+  } catch {
+    return false
+  }
+}
 
 function getAccessToken() {
   return requireEnv('MERCADOPAGO_ACCESS_TOKEN')
