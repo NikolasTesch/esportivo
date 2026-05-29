@@ -63,10 +63,9 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  const baseUrl =
-    getEnv('NEXT_PUBLIC_APP_URL') ??
-    req.headers.get('origin') ??
-    'http://localhost:3000'
+  const proto = req.headers.get('x-forwarded-proto') ?? 'https'
+  const host = req.headers.get('host') ?? 'esportivo.vercel.app'
+  const baseUrl = getEnv('NEXT_PUBLIC_APP_URL') ?? `${proto}://${host}`
 
   const kitLabel = KITS.find((k) => k.id === d.kit)?.label ?? 'Básico'
   const sucessoUrl = `${baseUrl}/esportivo/inscricao/sucesso?ref=${row.id}`
