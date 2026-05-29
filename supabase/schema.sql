@@ -27,7 +27,7 @@ create table if not exists public.inscricoes (
   amount_cents      integer,
   payment_method    text,
   provider          text not null default 'stripe'
-                       check (provider in ('stripe','infinitepay')),
+                       check (provider in ('stripe','pix','infinitepay')),
   stripe_session_id text unique,
   order_nsu         text unique,
   paid_at           timestamptz
@@ -41,10 +41,11 @@ create index if not exists inscricoes_created_idx on public.inscricoes (created_
 alter table public.inscricoes enable row level security;
 
 -- ------------------------------------------------------------
--- MIGRAÇÃO: se você já rodou a versão anterior do schema, rode
--- só este bloco para adicionar o suporte a InfinitePay/Pix:
+-- MIGRAÇÃO: se a tabela já existia, rode apenas este bloco para
+-- atualizar o check constraint e incluir 'pix' como provider.
 -- ------------------------------------------------------------
 -- alter table public.inscricoes
---   add column if not exists provider text not null default 'stripe'
---     check (provider in ('stripe','infinitepay')),
---   add column if not exists order_nsu text unique;
+--   drop constraint if exists inscricoes_provider_check;
+-- alter table public.inscricoes
+--   add constraint inscricoes_provider_check
+--     check (provider in ('stripe','pix','infinitepay'));
