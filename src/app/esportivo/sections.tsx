@@ -240,9 +240,9 @@ function Sobre() {
 
 function Percurso() {
   const hidratacao = [
-    { x: 150, y: 150, label: 'Hidratação · 2,5 km' },
-    { x: 470, y: 90, label: 'Hidratação · 7 km' },
-    { x: 760, y: 210, label: 'Hidratação · 14 km' },
+    { x: 146, y: 220, label: 'Hidratação · 2,5 km' },
+    { x: 485, y: 94, label: 'Hidratação · 7 km' },
+    { x: 711, y: 170, label: 'Hidratação · 14 km' },
   ]
   return (
     <section id="percurso" className="border-b border-white/10">
