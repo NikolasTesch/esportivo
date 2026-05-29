@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
+import { headers } from 'next/headers'
 import { BASE, INSCRICAO, PRECO_LABEL, sections } from './sections'
 import { AnimatedNavbar } from './motion'
 
@@ -13,7 +14,19 @@ export const metadata: Metadata = {
     '5K, 10K e 21K à beira-mar em apoio ao Instituto Reviva. 12 de julho de 2026, Av. Beira-Mar Norte, Florianópolis/SC. Vagas limitadas por lote.',
 }
 
-export default function EsportivoLayout({ children }: { children: React.ReactNode }) {
+export default async function EsportivoLayout({ children }: { children: React.ReactNode }) {
+  const headersList = await headers()
+  const pathname = headersList.get('x-pathname') || ''
+  const isAdmin = pathname.includes('/esportivo/admin')
+
+  if (isAdmin) {
+    return (
+      <div className="font-archivo lp-grain min-h-screen bg-[#0B0B0C] text-white selection:bg-[#D6FF3F] selection:text-black">
+        {children}
+      </div>
+    )
+  }
+
   return (
     <div className="font-archivo lp-grain min-h-screen bg-[#0B0B0C] text-white selection:bg-[#D6FF3F] selection:text-black">
       <AnimatedNavbar>
