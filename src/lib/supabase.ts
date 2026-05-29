@@ -33,7 +33,7 @@ export interface Inscricao {
   status: 'pendente' | 'pago' | 'cancelado'
   amount_cents: number | null
   payment_method: string | null
-  provider: 'mercadopago'
+  provider: 'mercadopago' | 'pix' | 'stripe'
   order_nsu: string | null
   paid_at: string | null
 }
