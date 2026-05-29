@@ -76,6 +76,38 @@ export async function createCheckoutPreference(params: {
   failureUrl: string
   pendingUrl: string
 }): Promise<MPPreferenceResult> {
+  const preference: Record<string, unknown> = {
+    items: [
+      {
+        id: params.inscricaoId,
+        title: params.description,
+        quantity: 1,
+        unit_price: params.amountCents / 100,
+        currency_id: 'BRL',
+      },
+    ],
+    payer: {
+      email: params.email,
+      name: params.nome,
+      identification: { type: 'CPF', number: params.cpf.replace(/\D/g, '') },
+    },
+    back_urls: {
+      success: params.successUrl,
+      failure: params.failureUrl,
+      pending: params.pendingUrl,
+    },
+    external_reference: params.inscricaoId,
+    notification_url: params.notificationUrl,
+    payment_methods: { installments: 12 },
+  }
+
+  // auto_return só é aceito pelo MP quando back_urls.success é uma URL pública
+  // https. Em localhost/http o MP retorna 400 (invalid_auto_return), então só
+  // habilitamos o retorno automático fora do ambiente local.
+  if (/^https:\/\//i.test(params.successUrl) && !/localhost|127\.0\.0\.1/.test(params.successUrl)) {
+    preference.auto_return = 'approved'
+  }
+
   const res = await fetch(`${MP_API}/checkout/preferences`, {
     method: 'POST',
     headers: {
@@ -83,31 +115,7 @@ export async function createCheckoutPreference(params: {
       'Content-Type': 'application/json',
       'X-Idempotency-Key': params.inscricaoId,
     },
-    body: JSON.stringify({
-      items: [
-        {
-          id: params.inscricaoId,
-          title: params.description,
-          quantity: 1,
-          unit_price: params.amountCents / 100,
-          currency_id: 'BRL',
-        },
-      ],
-      payer: {
-        email: params.email,
-        name: params.nome,
-        identification: { type: 'CPF', number: params.cpf.replace(/\D/g, '') },
-      },
-      back_urls: {
-        success: params.successUrl,
-        failure: params.failureUrl,
-        pending: params.pendingUrl,
-      },
-      auto_return: 'approved',
-      external_reference: params.inscricaoId,
-      notification_url: params.notificationUrl,
-      payment_methods: { installments: 12 },
-    }),
+    body: JSON.stringify(preference),
   })
 
   if (!res.ok) {

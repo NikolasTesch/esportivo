@@ -63,14 +63,30 @@ export async function POST(req: NextRequest) {
   const url = new URL(req.url)
   const topic = url.searchParams.get('topic')
   const qId = url.searchParams.get('id')
+  const queryDataId = url.searchParams.get('data.id')
+
+  // Corpo lido UMA única vez (req.json não pode ser consumido duas vezes).
+  // Precisamos dele tanto para o `data.id` da assinatura quanto para o
+  // processamento do webhook v2.
+  let body: Record<string, unknown> | null = null
+  try {
+    body = (await req.json()) as Record<string, unknown>
+  } catch {
+    body = null
+  }
+  const bodyData =
+    body && typeof body.data === 'object' && body.data
+      ? (body.data as Record<string, unknown>)
+      : null
+  const bodyDataId = bodyData?.id != null ? String(bodyData.id) : null
 
   // Rejeita notificações forjadas: valida a assinatura HMAC do Mercado Pago
-  // ANTES de qualquer consulta/atualização. O id do manifest vem do query
-  // `data.id` (webhook v2) ou do `id` legado.
+  // ANTES de qualquer consulta/atualização. O id do manifest segue a spec do
+  // MP (query `data.id`), com fallback para o `data.id` do corpo e o `id` legado.
   const validSignature = verifyWebhookSignature({
     signatureHeader: req.headers.get('x-signature'),
     requestId: req.headers.get('x-request-id'),
-    dataId: url.searchParams.get('data.id') ?? qId,
+    dataId: queryDataId ?? bodyDataId ?? qId,
   })
   if (!validSignature) {
     console.warn('mp_webhook_invalid_signature')
@@ -100,19 +116,9 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Novo formato (webhook v2): body JSON ──────────────────────────────
-    let body: Record<string, unknown>
-    try {
-      body = await req.json()
-    } catch {
-      return NextResponse.json({ ok: true })
-    }
-
-    if (body?.type === 'payment' && body?.data && typeof body.data === 'object') {
-      const dataId = (body.data as Record<string, unknown>).id
-      if (dataId) {
-        const payment = await getMPPayment(String(dataId))
-        await confirmarInscricao(payment)
-      }
+    if (body?.type === 'payment' && bodyDataId) {
+      const payment = await getMPPayment(bodyDataId)
+      await confirmarInscricao(payment)
     }
   } catch (err) {
     // Erro de rede/MP não deve bloquear o retorno 200 (MP re-tenta em falha).
