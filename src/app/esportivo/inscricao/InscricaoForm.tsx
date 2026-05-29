@@ -336,8 +336,8 @@ export function InscricaoForm() {
           </legend>
           <div className="grid gap-px bg-white/10 sm:grid-cols-2">
             {([
-              { id: 'cartao', titulo: 'Cartão de crédito', sub: 'Stripe · até 12x · aprovação na hora' },
-              { id: 'pix', titulo: 'Pix', sub: 'InfinitePay · pagamento à vista · sem taxa' },
+              { id: 'cartao', titulo: 'Cartão de crédito', sub: ' Até 12x · aprovação na hora' },
+              { id: 'pix', titulo: 'Pix', sub: ' Pagamento à vista' },
             ] as const).map((m) => {
               const ativo = metodo === m.id
               return (
