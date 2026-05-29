@@ -16,6 +16,7 @@ import {
   HeroBody,
   HeroActions,
   HeroBg,
+  HeroMarquee,
   FadeIn,
   SectionLabel,
   SectionHeading,
@@ -106,6 +107,7 @@ export function Hero() {
       <HeroBg className="pointer-events-none absolute -right-10 top-1/2 -translate-y-1/2 select-none text-[42vw] font-extrabold italic leading-none text-white/[0.03]">
         21K
       </HeroBg>
+      <HeroMarquee className="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 select-none text-[18vw] leading-none text-white/[0.03]" />
       <div className="relative mx-auto max-w-6xl">
         <AnimatedBadge className="mb-6 flex items-center gap-3 text-xs font-bold uppercase tracking-[0.3em] text-[#FF5A1F]">
           <HeartHandshake size={16} /> Corrida beneficente · Florianópolis · 12 de julho de 2026

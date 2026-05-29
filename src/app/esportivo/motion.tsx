@@ -74,6 +74,52 @@ export function HeroBg({ children, className }: { children: ReactNode; className
   )
 }
 
+// ── Hero marquee (logo "Corrida+" em loop contínuo) ────────────────────────
+
+export function HeroMarquee({
+  className,
+  duration = 28,
+}: {
+  className?: string
+  duration?: number
+}) {
+  // Duas cópias idênticas deslocando -50% garantem loop sem emenda.
+  const item = (
+    <span className="px-[0.15em] font-extrabold uppercase italic leading-none">
+      Corrida<span className="text-[#D6FF3F]/[0.04]">+</span>
+    </span>
+  )
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 2, delay: 0.4 }}
+      className={className}
+      aria-hidden
+    >
+      <motion.div
+        className="flex w-max whitespace-nowrap"
+        animate={{ x: ['0%', '-50%'] }}
+        transition={{ duration, ease: 'linear', repeat: Infinity }}
+      >
+        <span className="flex shrink-0">
+          {item}
+          {item}
+          {item}
+          {item}
+        </span>
+        <span className="flex shrink-0">
+          {item}
+          {item}
+          {item}
+          {item}
+        </span>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 // ── Scroll-triggered ───────────────────────────────────────────────────────
 
 export function FadeIn({

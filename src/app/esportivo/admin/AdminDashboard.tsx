@@ -332,9 +332,9 @@ export function AdminDashboard({ rows }: { rows: Inscricao[] }) {
     const cols = COLUMNS.filter((c) => exportCols.has(c.key))
     if (cols.length === 0) return
 
-    const header = cols.map((c) => c.label.toUpperCase()).join(' - ')
+    const header = cols.map((c) => c.label.toUpperCase()).join(', ')
     const lines = filtered.map((r) =>
-      cols.map((c) => c.text(r)).join(' - '),
+      cols.map((c) => c.text(r)).join(', '),
     )
 
     const partes: string[] = []
