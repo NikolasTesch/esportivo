@@ -1,6 +1,6 @@
 'use client'
 
-import { animate, motion, useInView } from 'framer-motion'
+import { animate, motion, useInView, useScroll, useTransform } from 'framer-motion'
 import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 const E = [0.16, 1, 0.3, 1] as const
@@ -284,22 +284,17 @@ export function CtaContent({ children, className }: { children: ReactNode; class
 // ── Animated navbar (scroll-aware) ────────────────────────────────────────
 
 export function AnimatedNavbar({ children }: { children: ReactNode }) {
-  const [scrolled, setScrolled] = useState(false)
-
-  useEffect(() => {
-    const handler = () => setScrolled(window.scrollY > 30)
-    window.addEventListener('scroll', handler, { passive: true })
-    handler()
-    return () => window.removeEventListener('scroll', handler)
-  }, [])
+  const { scrollY } = useScroll()
+  const bg = useTransform(scrollY, [0, 60], ['rgba(11,11,12,0.85)', 'rgba(11,11,12,0.97)'])
+  const border = useTransform(
+    scrollY,
+    [0, 60],
+    ['rgba(255,255,255,0.07)', 'rgba(255,255,255,0.14)'],
+  )
 
   return (
     <motion.header
-      animate={{
-        backgroundColor: scrolled ? 'rgba(11,11,12,0.97)' : 'rgba(11,11,12,0.85)',
-        borderBottomColor: scrolled ? 'rgba(255,255,255,0.14)' : 'rgba(255,255,255,0.07)',
-      }}
-      transition={{ duration: 0.3 }}
+      style={{ backgroundColor: bg, borderBottomColor: border }}
       className="sticky top-0 z-50 border-b backdrop-blur"
     >
       {children}

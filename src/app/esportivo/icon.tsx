@@ -21,12 +21,12 @@ export default function Icon() {
         <span
           style={{
             color: '#D6FF3F',
-            fontSize: 22,
+            fontSize: 28,
             fontWeight: 900,
-            fontStyle: 'italic',
             lineHeight: 1,
             letterSpacing: '-0.04em',
-            marginTop: -1,
+            transform: 'rotate(15deg)',
+            display: 'block',
           }}
         >
           +
