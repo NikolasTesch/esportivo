@@ -14,6 +14,21 @@ export const KITS = [
   { id: 'embaixador', label: 'Embaixador — add-on solidário (+R$ 169)', addCents: 16900 },
 ] as const
 
+export const KITS_DESC: Record<string, { desc: string; itens: string[] }> = {
+  basico: {
+    desc: 'Tudo o que você precisa para correr no dia.',
+    itens: ['Número de peito + chip de cronometragem', 'Camiseta técnica oficial 2026', 'Hidratação a cada 2,5 km', 'Medalha finisher na chegada'],
+  },
+  premium: {
+    desc: 'A lembrança completa do dia, mais foto digital.',
+    itens: ['Tudo do Básico', 'Sacola-mochila exclusiva do evento', 'Viseira técnica da edição', 'Pacote de fotos digitais em alta resolução'],
+  },
+  embaixador: {
+    desc: 'O kit que mais apoia a causa, com doação ao Instituto Reviva.',
+    itens: ['Tudo do Premium', 'Corta-vento + mochila do evento', 'Acesso à área VIP de chegada', 'Doação extra ao Instituto Reviva + certificado'],
+  },
+}
+
 // Tabela de tamanhos (medidas em cm, aproximadas).
 export const TAMANHOS: Record<
   (typeof GENEROS)[number],

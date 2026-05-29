@@ -1,11 +1,13 @@
 'use client'
 
 import { useMemo, useState } from 'react'
+import { Zap } from 'lucide-react'
 import {
   DISTANCIAS,
   FAIXAS,
   GENEROS,
   KITS,
+  KITS_DESC,
   TAMANHOS_VALIDOS,
   formatBRL,
   totalCents,
@@ -13,8 +15,30 @@ import {
 
 const inputCls =
   'w-full border border-white/15 bg-[#0B0B0C] px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-[#D6FF3F]'
+const inputErrCls =
+  'w-full border border-[#FF5A1F]/60 bg-[#0B0B0C] px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-white/30 focus:border-[#FF5A1F]'
 const labelCls =
   'mb-2 block text-[11px] font-bold uppercase tracking-[0.2em] text-white/45'
+
+function maskCPF(raw: string): string {
+  const n = raw.replace(/\D/g, '').slice(0, 11)
+  if (n.length <= 3) return n
+  if (n.length <= 6) return `${n.slice(0, 3)}.${n.slice(3)}`
+  if (n.length <= 9) return `${n.slice(0, 3)}.${n.slice(3, 6)}.${n.slice(6)}`
+  return `${n.slice(0, 3)}.${n.slice(3, 6)}.${n.slice(6, 9)}-${n.slice(9)}`
+}
+
+function maskPhone(raw: string): string {
+  const n = raw.replace(/\D/g, '').slice(0, 11)
+  if (n.length <= 2) return n.length ? `(${n}` : ''
+  if (n.length <= 6) return `(${n.slice(0, 2)}) ${n.slice(2)}`
+  if (n.length <= 10) return `(${n.slice(0, 2)}) ${n.slice(2, 6)}-${n.slice(6)}`
+  return `(${n.slice(0, 2)}) ${n.slice(2, 7)}-${n.slice(7)}`
+}
+
+function faixaLabel(f: string): string {
+  return f.replace('-', '–')
+}
 
 export function InscricaoForm() {
   const [genero, setGenero] = useState<(typeof GENEROS)[number]>('masculino')
@@ -22,9 +46,39 @@ export function InscricaoForm() {
   const [metodo, setMetodo] = useState<'cartao' | 'pix'>('cartao')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [cpf, setCpf] = useState('')
+  const [telefone, setTelefone] = useState('')
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   const tamanhos = TAMANHOS_VALIDOS[genero]
   const total = useMemo(() => totalCents(kit), [kit])
+  const kitInfo = KITS_DESC[kit]
+
+  const maxBirthDate = useMemo(() => {
+    const d = new Date()
+    d.setFullYear(d.getFullYear() - 16)
+    return d.toISOString().split('T')[0]
+  }, [])
+  const minBirthDate = useMemo(() => {
+    const d = new Date()
+    d.setFullYear(d.getFullYear() - 100)
+    return d.toISOString().split('T')[0]
+  }, [])
+
+  function validateField(name: string, value: string) {
+    let err = ''
+    if (name === 'cpf') {
+      if (value && !/^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(value)) {
+        err = 'CPF inválido — use o formato 000.000.000-00'
+      }
+    } else if (name === 'telefone') {
+      const digits = value.replace(/\D/g, '')
+      if (value && (digits.length < 10 || digits.length > 11)) {
+        err = 'Telefone inválido — inclua DDD e número completo'
+      }
+    }
+    setFieldErrors((prev) => ({ ...prev, [name]: err }))
+  }
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -34,8 +88,8 @@ export function InscricaoForm() {
     const payload = {
       nome: String(fd.get('nome') ?? ''),
       email: String(fd.get('email') ?? ''),
-      telefone: String(fd.get('telefone') ?? ''),
-      cpf: String(fd.get('cpf') ?? ''),
+      telefone,
+      cpf,
       data_nascimento: String(fd.get('data_nascimento') ?? ''),
       genero,
       faixa_etaria: String(fd.get('faixa_etaria') ?? ''),
@@ -105,7 +159,7 @@ export function InscricaoForm() {
             <select id="faixa_etaria" name="faixa_etaria" required className={inputCls} defaultValue="">
               <option value="" disabled>Selecione</option>
               {FAIXAS.map((f) => (
-                <option key={f} value={f}>{f} anos</option>
+                <option key={f} value={f}>{faixaLabel(f)} anos</option>
               ))}
             </select>
           </div>
@@ -144,6 +198,21 @@ export function InscricaoForm() {
             </select>
           </div>
         </div>
+
+        {/* Kit context panel */}
+        {kitInfo && (
+          <div className="border border-white/10 bg-[#0B0B0C] p-5">
+            <p className="mb-3 text-xs text-white/50">{kitInfo.desc}</p>
+            <ul className="space-y-1.5">
+              {kitInfo.itens.map((item) => (
+                <li key={item} className="flex items-start gap-2 text-xs text-white/70">
+                  <Zap size={12} className="mt-0.5 shrink-0 text-[#D6FF3F]" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </fieldset>
 
       <fieldset className="space-y-6">
@@ -161,15 +230,50 @@ export function InscricaoForm() {
           </div>
           <div>
             <label className={labelCls} htmlFor="telefone">Telefone / WhatsApp</label>
-            <input id="telefone" name="telefone" required className={inputCls} placeholder="(48) 99999-9999" />
+            <input
+              id="telefone"
+              name="telefone"
+              required
+              value={telefone}
+              onChange={(e) => setTelefone(maskPhone(e.target.value))}
+              onBlur={(e) => validateField('telefone', e.target.value)}
+              className={fieldErrors.telefone ? inputErrCls : inputCls}
+              placeholder="(48) 99999-9999"
+              inputMode="tel"
+            />
+            {fieldErrors.telefone && (
+              <p className="mt-1 text-xs text-[#FF5A1F]">{fieldErrors.telefone}</p>
+            )}
           </div>
           <div>
             <label className={labelCls} htmlFor="cpf">CPF</label>
-            <input id="cpf" name="cpf" required minLength={11} maxLength={14} className={inputCls} placeholder="000.000.000-00" />
+            <input
+              id="cpf"
+              name="cpf"
+              required
+              value={cpf}
+              onChange={(e) => setCpf(maskCPF(e.target.value))}
+              onBlur={(e) => validateField('cpf', e.target.value)}
+              className={fieldErrors.cpf ? inputErrCls : inputCls}
+              placeholder="000.000.000-00"
+              inputMode="numeric"
+            />
+            {fieldErrors.cpf && (
+              <p className="mt-1 text-xs text-[#FF5A1F]">{fieldErrors.cpf}</p>
+            )}
           </div>
           <div>
             <label className={labelCls} htmlFor="data_nascimento">Data de nascimento</label>
-            <input id="data_nascimento" name="data_nascimento" type="date" required className={inputCls} />
+            <input
+              id="data_nascimento"
+              name="data_nascimento"
+              type="date"
+              required
+              min={minBirthDate}
+              max={maxBirthDate}
+              className={inputCls}
+            />
+            <p className="mt-1 text-[11px] text-white/30">Participantes devem ter 16 anos ou mais na data do evento.</p>
           </div>
         </div>
       </fieldset>

@@ -56,7 +56,9 @@ export default async function SucessoPage({
     ? 'Inscrição confirmada'
     : cancelado
       ? 'Pagamento não concluído'
-      : 'Inscrição recebida'
+      : row
+        ? 'Inscrição recebida'
+        : 'Aguardando confirmação'
 
   return (
     <main className="mx-auto max-w-2xl px-6 py-24">
@@ -66,11 +68,20 @@ export default async function SucessoPage({
         <span className="text-[#FF5A1F]">.</span>
       </h1>
 
-      {!row && (
+      {!row && ref && (
         <p className="mt-5 text-base leading-relaxed text-white/60">
-          Não localizamos os dados desta inscrição. Se você concluiu o
-          pagamento, ele será processado normalmente e você receberá a
-          confirmação por e-mail.
+          Não conseguimos localizar esta inscrição no momento. Se você
+          concluiu o pagamento, a confirmação chegará por e-mail em instantes.
+        </p>
+      )}
+
+      {!row && !ref && (
+        <p className="mt-5 text-base leading-relaxed text-white/60">
+          Se você acabou de pagar via Pix, aguarde alguns instantes — a
+          confirmação pode levar até 5 minutos para aparecer. Você receberá
+          um e-mail assim que sua vaga for garantida. Pode atualizar esta
+          página em instantes ou acessar pelo link enviado no e-mail de
+          inscrição.
         </p>
       )}
 
@@ -129,7 +140,7 @@ export default async function SucessoPage({
                     : 'border border-white/25 text-white/60'
               }`}
             >
-              {row.status}
+              {pago ? 'Confirmado' : cancelado ? 'Não concluído' : 'Aguardando confirmação'}
             </span>
           </div>
         </div>
